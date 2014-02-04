@@ -1,0 +1,21 @@
+.blog-entry
+	%h1
+		%a{:href => to("/blog/entry/#{@e.id}/"), :class => 'entry-title'}= @e.title
+	%p= @e.created_at
+	.panel.panel-default
+		.panel-body
+			%p!= @e.body
+			- if @e.read_more then
+				%a{:href => to("/blog/entry/#{@e.id}/")}
+					%button.btn.btn-default= '続きを読む'
+		.panel-footer
+			= 'カテゴリー:'
+			- @e.category.each do |category|
+				!= '&nbsp;'
+				%a{:href => to("/blog/category/#{category}/")}><
+					= category
+				= ','
+			%br
+			%span
+				= 'コメント '
+				%span.badge= @e.comment_num

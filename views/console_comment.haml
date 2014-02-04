@@ -1,0 +1,23 @@
+.comment-area
+  %h2= 'コメント'
+  .list-group
+  - @comment.each do |c|
+    .list-group-item
+      - entry = Entry.find(c.entryId)
+      %p<
+        = "from:"
+        %strong= c.name
+        %br>
+        = c.created_at
+        %br>
+        %strong= entry.title
+      %p= c.body
+      - if c.allow == 0 then
+        - button_class = 'btn btn-warning'
+        - button_label = '承認する'
+        - button_script = 'allow_comment(this)'
+      - else
+        - button_class = 'btn btn-default'
+        - button_label = '公開中'
+        - button_script = 'deny_comment(this)'
+      %button{:id => c.id, :class => button_class, :onClick => button_script}= button_label

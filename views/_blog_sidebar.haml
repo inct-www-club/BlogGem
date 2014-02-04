@@ -1,0 +1,16 @@
+%h3= '記事'
+.list-group
+	- @newerEntry.each do |entry|
+		%a{:href => to("/blog/entry/#{entry.id}/"), :class => 'list-group-item'}= entry.title
+%h3= 'コメント'
+.list-group
+	- @newerComment.each do |comment|
+		%a{:href => to("/blog/entry/#{comment.entryId}/"), :class => 'list-group-item'}
+			= comment.name
+			%br
+			- entry = Entry.find(comment.entryId)
+			%small= entry.title
+%h3= 'カテゴリ'
+.list-group
+	- @category.each do |c|
+		%a{:href => to("/blog/category/#{c.name}/"), :class => 'list-group-item'}= c.name

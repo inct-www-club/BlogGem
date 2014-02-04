@@ -1,0 +1,29 @@
+- @e = @entry
+!= haml :_tpl_blog_entry
+- if @comment.size > 0 then
+  .comment-area
+    %h2= 'コメント'
+    - @comment.each do |c|
+      .panel.panel-default
+        .panel-heading= c.name
+        .panel-body
+          %p!= c.body
+          %br
+          = c.created_at
+.comment-area
+  %h2= 'コメントを書く'
+  %div
+    .alert.alert-success{:name => 'succsess', :style => 'display:none;'}
+      %strong= 'Complete'
+      = 'コメントの送信が完了しました。コメントは管理者の承認後、公開されます。'
+    .alert.alert-danger{:name => 'error', :style => 'display:none;'}
+      %strong= 'Error'
+      = 'すべての項目を入力してください。'
+    .form-group
+      %label= '名前'
+      %input{:name => 'name', :type => 'text', :class => 'form-control', :pleceholder => 'Your name'}
+    .form-group
+      %label= 'コメント'
+      %textarea{:name => 'body', :class => 'form-control', :rows => '10'}
+    .form-group
+      %button{:class => 'btn btn-default', :onClick => 'post_comment()'}= 'Send'

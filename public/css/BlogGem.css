@@ -1,0 +1,67 @@
+body {
+    overflow-y:scroll;
+}
+
+.panel-heading h1,
+.panel-heading h2,
+.panel-heading h3 {
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
+.panel-body ul,
+.panel-body ol {
+    margin-top:0px;
+    margin-bottom:0px;
+}
+
+.page-footer {
+    padding-top: 40px;
+    padding-bottom: 30px;
+    margin-top: 50px;
+    color: #777;
+    border-top: 1px solid #e5e5e5;
+}
+
+.blog-entry {
+    margin-top: 60px;
+    margin-bottom: 30px;
+}
+
+.entry-title {
+    color: #333333;
+}
+
+.comment-area {
+    margin-top: 60px;
+}
+
+.title-header {
+    padding-top: 20px;
+    padding-bottom: 10px;
+    background-color: darkcyan;
+    color: white;
+}
+
+.title-header h1 {
+    font-size: 50px;
+}
+
+.title-header small {
+    color: #eeeeee;
+}
+
+.tab {
+    padding-top: 20px;
+    background-color: #eeffff;
+}
+
+.tab ul {
+    border-bottom: 0px;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus {
+    border-color: darkcyan;
+    border-bottom-color: transparent;
+}
