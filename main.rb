@@ -112,9 +112,9 @@ end
 
 get '/console/aboutme/' do
   @element = Element.all
-  @listTitle = 'Element List'
-  @addButton = 'Add Element'
-  erb :elementList
+  @list_title = 'Element List'
+  @add_button = 'Add Element'
+  haml :element_list
 end
 
 get '/console/aboutme/:id/' do |id|
@@ -155,9 +155,9 @@ end
 
 get '/console/blog/entry/' do
   @element = Entry.order("id desc").all
-  @listTitle = 'Entry List'
-  @addButton = 'Add Entry'
-  erb :elementList
+  @list_title = 'Entry List'
+  @add_button = 'Add Entry'
+  haml :element_list
 end
 
 get '/console/blog/entry/:id/' do |id|

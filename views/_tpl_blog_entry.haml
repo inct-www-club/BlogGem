@@ -7,7 +7,7 @@
 			%p!= @e.body
 			- if @e.read_more then
 				%a{:href => to("/blog/entry/#{@e.id}/")}
-					%button.btn.btn-default= '続きを読む'
+					%button.btn.btn-warning= 'More'
 		.panel-footer
 			= 'カテゴリー:'
 			- @e.category.each do |category|

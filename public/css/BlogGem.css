@@ -80,3 +80,19 @@ body {
 .badge {
     background-color: darkcyan;
 }
+
+.btn-darkcyan {
+    color: white;
+    background-color: darkcyan;
+    border-color: darkcyan;
+}
+
+.btn-darkcyan:hover,
+.btn-darkcyan:focus,
+.btn-darkcyan:active,
+.btn-darkcyan.active,
+.open .dropdown-toggle.btn-darkcyan {
+    color: white;
+    background-color: #00b3b3;
+    border-color: darkcyan;
+}
