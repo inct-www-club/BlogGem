@@ -146,7 +146,7 @@ helpers do
     products.dropdown = Array.new
     products.dropdown << Tabs.new('Coming soon!', nil, nil)
     @tab << products
-    @tab << Tabs.new('Contact', nil, to('/Contact/'))
+    @tab << Tabs.new('Contact', nil, to('/contact/'))
   end
 
   def nil_or_blank?(target)
@@ -156,5 +156,14 @@ helpers do
   #Linux only
   def send_mail(body)
     puts `echo "#{body}" | "Contact from Sinji's view" "contact@sinjis-view.mydns.jp"`
+  end
+
+  def set_active_tab(tab_name)
+    @tab.each do |tab|
+      if tab.name == tab_name then
+        tab.style = 'active'
+        return
+      end
+    end
   end
 end

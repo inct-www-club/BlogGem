@@ -7,21 +7,28 @@ function add_str_at_cursor(target, str){
     input_area.value = after_add;
 }
 
-function check_form(target){
-	var input_area = document.getElementsByName(target)[0];
+function check_form(input_area){
   var alert_area = input_area.parentNode;
   alert_area.className = alert_area.className.replace(' alert alert-danger', '');
-	if(input_area.value == ""){
-		alert_area.className += " alert alert-danger";
+	if(input_area.value == ''){
+		alert_area.className += ' alert alert-danger';
 		return false;
 	}
 	return true;
 }
 
-function check_form_dual(t1, t2){
-	var return1 = check_form(t1);
-	var return2 = check_form(t2);
-	return return1 && return2;
+function check_email_address(input_area){
+  if(check_form(input_area)){
+    if(!input_area.value.match(/.+@.+\..+/)){
+      var alert_area = input_area.parentNode;
+      alert_area.className += ' alert alert-danger';
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
+  return false;
 }
 
 function post_comment(){
@@ -31,12 +38,48 @@ function post_comment(){
   var succsess = document.getElementsByName('succsess')[0];
   var error = document.getElementsByName('error')[0];
 
-  if (check_form_dual('name', 'body')){
+  var n = check_form(name);
+  var b = check_form(body);
+
+  if (n && b){
     $.post('./send-comment', {
       name: name.value,
       body: body.value
     }, function(){
       name.value = '';
+      body.value = '';
+      $(succsess).slideDown();
+      $(error).slideUp();
+    })
+  }
+  else{
+    $(succsess).slideUp();
+    $(error).slideDown();
+  }
+
+  return true;
+}
+
+function send_mail(){
+  var name = document.getElementsByName('name')[0];
+  var address = document.getElementsByName('address')[0];
+  var body = document.getElementsByName('body')[0];
+
+  var succsess = document.getElementsByName('succsess')[0];
+  var error = document.getElementsByName('error')[0];
+
+  var n = check_form(name);
+  var a = check_email_address(address);
+  var b = check_form(body);
+
+  if (n && a && b){
+    $.post('./send-mail', {
+      name: name.value,
+      address: address.value,
+      body: body.value
+    }, function(){
+      name.value = '';
+      address.value = '';
       body.value = '';
       $(succsess).slideDown();
       $(error).slideUp();

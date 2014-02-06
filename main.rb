@@ -99,7 +99,15 @@ get '/blog/category/:category/:pagination/' do |category, p|
 end
 
 get '/contact/' do
+  set_active_tab('Contact')
   haml :contact
+end
+
+post '/contact/send-mail' do
+  name    = escape_html(params[:name])
+  address = escape_html(params[:address])
+  body    = escape_html(params[:body])
+  send_mail("#{name}\n#{address}\n\n#{body}")
 end
 
 get '/console/aboutme/' do

@@ -53,15 +53,30 @@ body {
 
 .tab {
     padding-top: 20px;
-    background-color: #eeffff;
+    border: 1px solid darkcyan;
+    background-color: darkcyan;
 }
 
 .tab ul {
     border-bottom: 0px;
 }
 
+.nav-tabs > li > a {
+    color: white;
+}
+
+.nav-tabs > li > a:hover {
+    background-color: #00b3b3;
+    border-color: #00b3b3;
+    border-bottom-color: transparent;
+}
+
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:focus {
     border-color: darkcyan;
     border-bottom-color: transparent;
+}
+
+.badge {
+    background-color: darkcyan;
 }
