@@ -1,10 +1,12 @@
 helpers do
-
+=begin
   def format_date(date)
     fdate = DateTime.parse("#{date}")
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
+=end
 
+=begin
   def format_entry(entry, split_body)
     formated = FormatedEntry.new
 
@@ -35,6 +37,7 @@ helpers do
 
     return formated
   end
+=end
 
   def format_entries(entry_array, split_body)
     formated = Array.new
@@ -46,6 +49,7 @@ helpers do
     return formated
   end
 
+=begin
   def format_comment(comment)
     formated = FormatedComment.new
 
@@ -61,12 +65,13 @@ helpers do
 
     return formated
   end
+=end
 
   def format_comments(comment_array)
     formated = Array.new
 
     comment_array.each do |c|
-      formated << format_comment(c)
+      formated << c.format_comment()
     end
 
     return formated
@@ -139,14 +144,15 @@ helpers do
   end
 
   def create_tab()
-    @tab = Array.new
-    @tab << Tabs.new('Home', nil, to('/'))
-    @tab << Tabs.new('Blog', nil, to('/blog/'))
+    tabs = Array.new
+    tabs << Tabs.new('Home', nil, to('/'))
+    tabs << Tabs.new('Blog', nil, to('/blog/'))
     products = Tabs.new('Products', 'dropdown', to('/products/'))
     products.dropdown = Array.new
     products.dropdown << Tabs.new('Coming soon!', nil, nil)
-    @tab << products
-    @tab << Tabs.new('Contact', nil, to('/contact/'))
+    tabs << products
+    tabs << Tabs.new('Contact', nil, to('/contact/'))
+    return tabs
   end
 
   def nil_or_blank?(target)
@@ -158,6 +164,7 @@ helpers do
     puts `echo "#{body}" | "Contact from Sinji's view" "contact@sinjis-view.mydns.jp"`
   end
 
+=begin
   def set_active_tab(tab_name)
     @tab.each do |tab|
       if tab.name == tab_name then
@@ -166,4 +173,6 @@ helpers do
       end
     end
   end
+=end
+
 end

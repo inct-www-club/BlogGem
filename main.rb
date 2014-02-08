@@ -20,7 +20,7 @@ end
 
 before do
   @documentRoot = '/area'
-  create_tab()
+  @tab = create_tab()
 end
 
 before %r{^/blog/(.*)} do
@@ -99,7 +99,7 @@ get '/blog/category/:category/:pagination/' do |category, p|
 end
 
 get '/contact/' do
-  set_active_tab('Contact')
+  Tabs.set_active_tab('Contact')
   haml :contact
 end
 

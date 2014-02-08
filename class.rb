@@ -44,6 +44,23 @@ class Comment < ActiveRecord::Base
     fdate = DateTime.parse("#{created_at}")
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
+
+  def format_comment()
+    formated = FormatedComment.new
+
+    formated.id = id
+
+    formated.entry_id = entryId
+
+    formated.name = Rack::Utils.escape_html(name)
+
+    formated.body =
+      Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />')
+
+    formated.created_at = date()
+
+    return formated
+  end
 end
 
 class Category < ActiveRecord::Base
@@ -60,6 +77,15 @@ class Tabs
     @dropdown
   end
   attr_accessor :name, :style, :href, :dropdown
+
+  def self.set_active_tab(tab_name)
+    @tab.each do |tab|
+      if tab.name == tab_name then
+        tab.style = 'active'
+        return
+      end
+    end
+  end
 end
 
 class FormatedEntry
