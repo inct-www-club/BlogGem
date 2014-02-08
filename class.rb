@@ -77,15 +77,6 @@ class Tabs
     @dropdown
   end
   attr_accessor :name, :style, :href, :dropdown
-
-  def self.set_active_tab(tab_name)
-    @tab.each do |tab|
-      if tab.name == tab_name then
-        tab.style = 'active'
-        return
-      end
-    end
-  end
 end
 
 class FormatedEntry

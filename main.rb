@@ -30,20 +30,23 @@ before %r{^/blog/(.*)} do
   @newerEntry = Entry.order("id desc").limit(5)
   @category = Category.all
   @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
-  @tab[1].style = 'active'
+  set_active_tab('Blog')
 end
 
 get '/' do
-  @tab[0].style = 'active'
+  @page_title = 'Sinji\'s View 酒田　シンジの目線'
+  set_active_tab('Home')
   @element = Element.all
   haml :about_me
 end
 
 get '/blog/' do
+  @page_title = 'Blog - Sinji\'s View'
   show_page 1
 end
 
 get '/blog/page/:page/' do |p|
+  @page_title = 'Blog - Sinji\'s View'
   pagination = p.to_i
   if pagination < 2 then
     redirect to '/blog/'
@@ -60,6 +63,7 @@ get '/blog/entry/:id/' do |i|
     @entry = Entry.find(id).format_entry(false)
     @commentNum = 0
     @comment = format_comments(Comment.where(:entry_id => id, :allow => 1))
+    @page_title = @entry.title + ' - Sinji\'s View'
     haml :blog_entry
   rescue ActiveRecord::RecordNotFound
     haml :not_found
@@ -88,10 +92,12 @@ post '/blog/entry/:id/send-comment' do |i|
 end
 
 get '/blog/category/:category/' do |category|
+  @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
   show_category_page(category, 1)
 end
 
 get '/blog/category/:category/:pagination/' do |category, p|
+  @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
   pagination = p.to_i
   if pagination < 2 then
     redirect to '/blog/'
@@ -100,7 +106,8 @@ get '/blog/category/:category/:pagination/' do |category, p|
 end
 
 get '/contact/' do
-  Tabs.set_active_tab('Contact')
+  @page_title = 'Contact - Sinji\'s View'
+  set_active_tab('Contact')
   haml :contact
 end
 

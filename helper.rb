@@ -109,4 +109,13 @@ helpers do
     puts `echo "#{body}" | "#{title}" "#{from}"`
   end
 
+  def set_active_tab(tab_name)
+    @tab.each do |tab|
+      if tab.name == tab_name then
+        tab.style = 'active'
+        return
+      end
+    end
+  end
+
 end
