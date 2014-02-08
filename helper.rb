@@ -40,7 +40,7 @@ helpers do
     formated = Array.new
 
     entry_array.each do |e|
-      formated << format_entry(e, split_body)
+      formated << e.format_entry(split_body)
     end
 
     return formated
@@ -57,7 +57,7 @@ helpers do
 
     formated.body = escape_html(comment.body).gsub(/(\r\n|\r|\n)/, '<br />')
 
-    formated.created_at = format_date(comment.created_at)
+    formated.created_at = comment.date()
 
     return formated
   end
@@ -126,7 +126,7 @@ helpers do
 
         @entry = Array.new
         searcher.each do |s|
-          @entry << format_entry(Entry.find(s.entryId), true)
+          @entry << Entry.find(s.entryId).format_entry(true)
         end
 
         haml :blogPages

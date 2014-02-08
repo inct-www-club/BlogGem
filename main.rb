@@ -56,7 +56,7 @@ get '/blog/entry/:id/' do |i|
     redirect to '/blog/'
   end
   begin
-    @entry = format_entry(Entry.find(id), false)
+    @entry = Entry.find(id).format_entry(false)
     @commentNum = 0
     @comment = format_comments(Comment.where(:entryId => id, :allow => 1))
     haml :blog_entry
