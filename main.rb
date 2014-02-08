@@ -197,13 +197,14 @@ post '/console/blog/entry/:id/post' do |id|
   entry.title = params[:title]
   entry.body  = params[:entry]
   entry.category = ''
-  entry.save
-  params[:category].each do |c|
-    searcher = Searcher.new
-    searcher.entry_id = entry.id
-    searcher.category_id = c
-    searcher.save
-    entry.category = "#{entry.category}#{c},"
+  if params[:category] != nil then
+    params[:category].each do |c|
+      searcher = Searcher.new
+      searcher.entry_id = entry.id
+      searcher.category_id = c
+      searcher.save
+      entry.category = "#{entry.category}#{c},"
+    end
   end
   entry.save
   redirect to '/console/blog/'
