@@ -34,15 +34,15 @@
 		.container
 			- if @sidebar == 'active' then
 				.col-sm-9
-					!= yield
+					= yield
 				.col-sm-3{:style => 'margin-top:60px;'}
-					!= haml :_blog_sidebar
+					= haml :_blog_sidebar
 			- else
-				!= yield
+				= yield
 		.page-footer
 			.container
-				%p!= 'Copyright (C) 2012 - 2014&nbsp;&nbsp;Sinji Sakata All Rights Reserved.'
-				%p!= "Powered by #{link_to('https://www.ruby-lang.org/ja/', 'Ruby')}, #{link_to('http://www.sinatrarb.com/', 'Sinatra')} and #{link_to('http://getbootstrap.com/', 'Bootstrap')}."
+				%p= "Copyright (C) 2012 - #{@year}&nbsp;&nbsp;Sinji Sakata All Rights Reserved."
+				%p= "Powered by #{link_to('https://www.ruby-lang.org/ja/', 'Ruby')}, #{link_to('http://www.sinatrarb.com/', 'Sinatra')} and #{link_to('http://getbootstrap.com/', 'Bootstrap')}."
 		%script{:src => 'https://code.jquery.com/jquery.js'}
 		%script{:src => to('/js/bootstrap.min.js')}
 		%script{:src => to('/js/BlogGem.js')}

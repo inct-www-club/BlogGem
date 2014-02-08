@@ -19,6 +19,7 @@ error do |e|
 end
 
 before do
+  @year = Time.now.year
   @documentRoot = '/area'
   @tab = create_tab()
 end
