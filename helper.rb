@@ -45,7 +45,7 @@ helpers do
 
       haml :blogPages
     else
-      erb :notFound
+      haml :not_found
     end
   end
 
@@ -79,10 +79,10 @@ helpers do
 
         haml :blogPages
       else
-        erb :notFound
+        haml :not_found
       end
     else
-      erb :notFound
+      haml :not_found
     end
   end
 
