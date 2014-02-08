@@ -50,7 +50,7 @@ class Comment < ActiveRecord::Base
 
     formated.id = id
 
-    formated.entry_id = entryId
+    formated.entry_id = entry_id
 
     formated.name = Rack::Utils.escape_html(name)
 

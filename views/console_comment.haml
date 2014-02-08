@@ -3,7 +3,7 @@
   .list-group
   - @comment.each do |c|
     .list-group-item
-      - entry = Entry.find(c.entryId)
+      - entry = Entry.find(c.entry_id)
       %p<
         = "from:"
         %strong= c.name

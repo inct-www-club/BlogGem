@@ -6,10 +6,10 @@
 %h3= 'コメント'
 .list-group
 	- @newerComment.each do |comment|
-		%a{:href => to("/blog/entry/#{comment.entryId}/"), :class => 'list-group-item'}
+		%a{:href => to("/blog/entry/#{comment.entry_id}/"), :class => 'list-group-item'}
 			= comment.name
 			%br
-			- entry = Entry.find(comment.entryId)
+			- entry = Entry.find(comment.entry_id)
 			%small= entry.title
 %h3= 'カテゴリ'
 .list-group

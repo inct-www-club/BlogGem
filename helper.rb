@@ -1,44 +1,5 @@
 helpers do
-=begin
-  def format_date(date)
-    fdate = DateTime.parse("#{date}")
-    return fdate.strftime("%Y/%m/%d %H:%M")
-  end
-=end
-
-=begin
-  def format_entry(entry, split_body)
-    formated = FormatedEntry.new
-
-    formated.id = entry.id
-
-    formated.title = entry.title
-
-    if split_body == true then
-      body = entry.body.split('[read_more]')
-      formated.body = "#{body[0]}".gsub(/(\r\n|\r|\n)/, '<br />')
-      formated.read_more = (body.size >= 2)
-    else
-      body = entry.body.gsub(/(\r\n|\r|\n)/, '<br />')
-      formated.body = body.gsub('[read_more]', '')
-    end
-
-    category_num = entry.category.split(',')
-    category_num.each do |c|
-      begin
-        category =  Category.find(c.to_i)
-        formated.category << category.name
-      end
-    end
-
-    formated.comment_num = entry.comment_num
-
-    formated.created_at = format_date(entry.created_at)
-
-    return formated
-  end
-=end
-
+  
   def format_entries(entry_array, split_body)
     formated = Array.new
 
@@ -48,24 +9,6 @@ helpers do
 
     return formated
   end
-
-=begin
-  def format_comment(comment)
-    formated = FormatedComment.new
-
-    formated.id = comment.id
-
-    formated.entry_id = comment.entryId
-
-    formated.name = escape_html(comment.name)
-
-    formated.body = escape_html(comment.body).gsub(/(\r\n|\r|\n)/, '<br />')
-
-    formated.created_at = comment.date()
-
-    return formated
-  end
-=end
 
   def format_comments(comment_array)
     formated = Array.new
@@ -111,7 +54,7 @@ helpers do
     category_info = Category.where(:name => category)
     if category_info.size == 1 then
       of = (pagination-1)*5
-      wh = {:categoryId => category_info[0].id}
+      wh = {:category_id => category_info[0].id}
       searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
       if searcher.size > 0 then
         if pagination == 1 then
@@ -131,7 +74,7 @@ helpers do
 
         @entry = Array.new
         searcher.each do |s|
-          @entry << Entry.find(s.entryId).format_entry(true)
+          @entry << Entry.find(s.entry_id).format_entry(true)
         end
 
         haml :blogPages
@@ -161,18 +104,9 @@ helpers do
 
   #Linux only
   def send_mail(body)
-    puts `echo "#{body}" | "Contact from Sinji's view" "contact@sinjis-view.mydns.jp"`
+    title = 'Contact from Sinji\'s view'
+    to = 'contact@sinjis-view'
+    puts `echo "#{body}" | "#{title}" "#{from}"`
   end
-
-=begin
-  def set_active_tab(tab_name)
-    @tab.each do |tab|
-      if tab.name == tab_name then
-        tab.style = 'active'
-        return
-      end
-    end
-  end
-=end
 
 end

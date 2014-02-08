@@ -58,10 +58,10 @@ get '/blog/entry/:id/' do |i|
   begin
     @entry = Entry.find(id).format_entry(false)
     @commentNum = 0
-    @comment = format_comments(Comment.where(:entryId => id, :allow => 1))
+    @comment = format_comments(Comment.where(:entry_id => id, :allow => 1))
     haml :blog_entry
   rescue ActiveRecord::RecordNotFound
-    erb :notFound
+    haml :not_found
   end
 end
 
@@ -80,7 +80,7 @@ post '/blog/entry/:id/send-comment' do |i|
   end
 
   comment = Comment.new
-  comment.entryId = id
+  comment.entry_id = id
   comment.name = params[:name]
   comment.body = params[:body]
   comment.save
@@ -126,7 +126,7 @@ get '/console/aboutme/:id/' do |id|
   elsif id != 'new' then
     redirect to '/console/aboutme/'
   end
-  erb :edit
+  haml :edit
 end
 
 post '/console/aboutme/:id/post' do |id|
@@ -187,6 +187,9 @@ post '/console/blog/entry/:id/post' do |id|
     redirect to '/console/blog/'
   end
   if params[:submit] == 'delete' then
+    Comment.where(:entry_id => entry.id).each do |comment|
+      comment.destroy
+    end
     entry.destroy
     redirect to '/console/blog/'
   end
@@ -196,8 +199,8 @@ post '/console/blog/entry/:id/post' do |id|
   entry.save
   params[:category].each do |c|
     searcher = Searcher.new
-    searcher.entryId = entry.id
-    searcher.categoryId = c
+    searcher.entry_id = entry.id
+    searcher.category_id = c
     searcher.save
     entry.category = "#{entry.category}#{c},"
   end
@@ -207,7 +210,7 @@ end
 
 get '/console/blog/category/' do
   @category = Category.all
-  erb :categoryEdit
+  haml :category_edit
 end
 
 post '/console/blog/category/save' do
@@ -241,7 +244,7 @@ get '/console/blog/comment/allow' do
   id = params[:id].to_i
   begin
     comment = Comment.find(id)
-    entry = Entry.find(comment.entryId)
+    entry = Entry.find(comment.entry_id)
     comment.allow = 1
     comment.save
     entry.comment_num += 1
@@ -253,7 +256,7 @@ get '/console/blog/comment/deny' do
   id = params[:id].to_i
   begin
     comment = Comment.find(id)
-    entry = Entry.find(comment.entryId)
+    entry = Entry.find(comment.entry_id)
     comment.allow = 0
     comment.save
     if entry.comment_num > 0 then
