@@ -19,8 +19,17 @@ class Entry < ActiveRecord::Base
       formated.body = "#{_body[0]}".gsub(/(\r\n|\r|\n)/, '<br />')
       formated.read_more = _body.size >= 2
     else
-      _body = body.gsub(/(\r\n|\r|\n)/, '<br />')
-      formated.body = _body.gsub('[read_more]', '')
+      enter = /(\r\n|\r|\n)/
+      formated.body = body.gsub('[read_more]', '').gsub(enter, '<br />')
+    end
+
+    _body = formated.body.split(/<pre.*?pre>/)
+    codes = formated.body.scan(/<pre.*?pre>/)
+    formated.body = ''
+    _body.each do |piece|
+      print "#{codes[0]}".gsub('<br />', "\n")
+      formated.body = formated.body + piece + "#{codes[0]}".gsub('<br />', "\n")
+      codes.delete_at(0)
     end
 
     _category_num = category.split(',')

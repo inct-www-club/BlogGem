@@ -5,6 +5,7 @@ require 'active_record'
 require 'haml'
 
 register Sinatra::Reloader
+ActiveRecord::Base.default_timezone = :local
 
 load 'helper.rb'
 load 'class.rb'
