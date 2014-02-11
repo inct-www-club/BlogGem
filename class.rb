@@ -25,11 +25,23 @@ class Entry < ActiveRecord::Base
 
     _body = formated.body.split(/<pre.*?pre>/)
     codes = formated.body.scan(/<pre.*?pre>/)
+    print "codes length = #{codes.length}\n"
+    formated_codes = Array.new
+    codes.each do |code|
+      pre_head = code.scan(/<pre.*?>/).first
+      code.slice!(/<pre.*?>/)
+      pre_tail_array = code.scan(/<\/.*?pre>/)
+      pre_tail = pre_tail_array.last
+      print "pre_tail = " + pre_tail
+      code.slice!(/<\/pre>/)
+      code = Rack::Utils.escape_html(code)
+      code = pre_head + code + '</pre>'
+      formated_codes << code
+    end
+
     formated.body = ''
     _body.each do |piece|
-      print "#{codes[0]}".gsub('<br />', "\n")
-      formated.body = formated.body + piece + "#{codes[0]}".gsub('<br />', "\n")
-      codes.delete_at(0)
+      formated.body = (formated.body + piece + "#{formated_codes.shift}".gsub(Rack::Utils.escape_html('<br />'), "\n"))
     end
 
     _category_num = category.split(',')
