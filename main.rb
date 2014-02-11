@@ -34,6 +34,11 @@ before %r{^/blog/(.*)} do
   set_active_tab('Blog')
 end
 
+before %r{^/console/(.*)} do
+  @tab << Tabs.new('Console', 'float:right;', to('/console/'))
+  set_active_tab('Console')
+end
+
 get '/' do
   @page_title = 'Sinji\'s View 酒田　シンジの目線'
   set_active_tab('Home')
@@ -193,14 +198,14 @@ post '/console/blog/entry/:id/post' do |id|
   elsif id == 'new' then
     entry = Entry.new
   else
-    redirect to '/console/blog/'
+    redirect to '/console/blog/entry/'
   end
   if params[:submit] == 'delete' then
     Comment.where(:entry_id => entry.id).each do |comment|
       comment.destroy
     end
     entry.destroy
-    redirect to '/console/blog/'
+    redirect to '/console/blog/entry/'
   end
   entry.title = params[:title]
   entry.body  = params[:entry]
@@ -215,7 +220,7 @@ post '/console/blog/entry/:id/post' do |id|
     end
   end
   entry.save
-  redirect to '/console/blog/'
+  redirect to '/console/blog/entry/'
 end
 
 get '/console/blog/category/' do
