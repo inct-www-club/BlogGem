@@ -91,13 +91,14 @@ class Searcher < ActiveRecord::Base
 end
 
 class Tabs
-  def initialize(name, style, href)
+  def initialize(name, css_class, href)
     @name = name
-    @style = style
+    @css_class = css_class
+    @style
     @href = href
     @dropdown
   end
-  attr_accessor :name, :style, :href, :dropdown
+  attr_accessor :name, :href, :dropdown, :css_class, :style
 end
 
 class FormatedEntry

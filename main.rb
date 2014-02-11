@@ -35,7 +35,8 @@ before %r{^/blog/(.*)} do
 end
 
 before %r{^/console/(.*)} do
-  @tab << Tabs.new('Console', 'float:right;', to('/console/'))
+  @tab << Tabs.new('Console', nil, to('/console/'))
+  @tab.last.style = 'float:right;'
   set_active_tab('Console')
 end
 

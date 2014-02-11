@@ -112,7 +112,11 @@ helpers do
   def set_active_tab(tab_name)
     @tab.each do |tab|
       if tab.name == tab_name then
-        tab.style = 'active'
+        if tab.css_class == nil then
+          tab.css_class = 'active'
+        else
+          tab.css_class = "#{tab.css_class} active"
+        end
         return
       end
     end
