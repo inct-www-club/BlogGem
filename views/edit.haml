@@ -1,5 +1,5 @@
 .page-header
-  %h= 'Edit article'
+  %h1= 'Edit article'
 %form{:name => 'edit_form', :ole => 'form', :method => 'post', :action => './post', :onSubmit => "return check_form_dual('title', 'entry')"}
   .form-group
     %label= 'Title'
@@ -7,7 +7,7 @@
   .form-group
     %label= 'Entry'
     %textarea{:name => 'entry', :class => 'form-control', :rows => '20'}= @body
-    .btn-group
+    .btn-group{:style => 'margin-top: 10px;'}
       %button{:type => 'button', :class => 'btn btn-default', :onClick => "add_str_at_cursor('entry', '[read_more]');"}= '[read_more]'
   - if @entryEdit == 'active' then
     .form-group
@@ -20,5 +20,5 @@
             - @entryCategory.delete_at(0)
           %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => @checked}= c.name
   .form-group{:style => 'margin-top:30px;'}
-    - create_buttons().each do |property|
-      %button{property}= property['name']
+    - create_form_buttons().each do |property|
+      %button{property}= property[:name]

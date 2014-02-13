@@ -113,10 +113,11 @@ function deny_comment(button){
   })
 }
 
-function post_preview(form, action){
+function post_preview(form, action, blank){
   form.action = action;
+  form.target = blank;
 }
 
 function grand_parent(element){
-  return element.parent().parent();
+  return element.parentNode.parentNode;
 }

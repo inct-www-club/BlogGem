@@ -5,6 +5,7 @@ require 'active_record'
 require 'haml'
 
 register Sinatra::Reloader
+Encoding.default_external = 'utf-8'
 ActiveRecord::Base.default_timezone = :local
 
 load 'class.rb'
@@ -153,27 +154,27 @@ helpers do
     buttons = Array.new
     buttons << {:type  => 'submit',
                 :value => 'post',
-                :class => 'btn btn-default',
+                :class => 'btn btn-primary',
                 :target => '',
-                :onClick => "grand_parent(this).action = './post')",
+                :onClick => "post_preview(this.form, './post', '')",
                 :name => 'Post'}
     buttons << {:type  => 'submit',
                 :value => 'save',
                 :class => 'btn btn-default',
                 :target => '',
-                :onClick => "grand_parent(this).action = './post')",
+                :onClick => "grand_parent(this).action = './post'",
                 :name => 'Save'}
     buttons << {:type  => 'submit',
                 :value => 'preview',
                 :class => 'btn btn-default',
                 :target => '_blank',
-                :onClick => "grand_parent(this).action = './preview",
+                :onClick => "post_preview(this.form, './preview', '_blank')",
                 :name => 'Preview'}
     buttons << {:type  => 'submit',
                 :value => 'delete',
-                :class => 'btn btn-default',
+                :class => 'btn btn-danger',
                 :target => '',
-                :onClick => "grand_parent(this).action = './post')",
+                :onClick => "grand_parent(this).action = './post'",
                 :style => 'float: right;',
                 :name => 'Delete'}
     return buttons
@@ -190,7 +191,7 @@ before do
   @tab = create_tab()
 end
 
-before %r{^/blog/(.*)} do
+before %r{(^/blog/|/preview$)} do
   @sidebar = 'active'
   @blog_active = 'active'
   @newerEntry = Entry.order("id desc").limit(5)
@@ -388,6 +389,22 @@ post '/console/blog/entry/:id/post' do |id|
   end
   entry.save
   redirect to '/console/blog/entry/'
+end
+
+post '/console/blog/entry/:id/preview' do |id|
+  entry = Entry.new
+  entry.title = params[:title]
+  entry.body  = params[:entry]
+  entry.category = ""
+  if params[:category] != nil then
+    params[:category].each do |c|
+      entry.category = "#{entry.category}#{c},"
+    end
+  end
+  entry.created_at = Time.now
+  @entry = entry.format_entry(false)
+  @comment = Array.new
+  haml :blog_entry
 end
 
 get '/console/blog/category/' do
