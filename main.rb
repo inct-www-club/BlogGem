@@ -149,6 +149,35 @@ helpers do
     end
   end
 
+  def create_form_buttons()
+    buttons = Array.new
+    buttons << {:type  => 'submit',
+                :value => 'post',
+                :class => 'btn btn-default',
+                :target => '',
+                :onClick => "grand_parent(this).action = './post')",
+                :name => 'Post'}
+    buttons << {:type  => 'submit',
+                :value => 'save',
+                :class => 'btn btn-default',
+                :target => '',
+                :onClick => "grand_parent(this).action = './post')",
+                :name => 'Save'}
+    buttons << {:type  => 'submit',
+                :value => 'preview',
+                :class => 'btn btn-default',
+                :target => '_blank',
+                :onClick => "grand_parent(this).action = './preview",
+                :name => 'Preview'}
+    buttons << {:type  => 'submit',
+                :value => 'delete',
+                :class => 'btn btn-default',
+                :target => '',
+                :onClick => "grand_parent(this).action = './post')",
+                :style => 'float: right;',
+                :name => 'Delete'}
+    return buttons
+  end
 end
 
 error do |e|

@@ -112,3 +112,11 @@ function deny_comment(button){
     button.innerHTML = '承認する';
   })
 }
+
+function post_preview(form, action){
+  form.action = action;
+}
+
+function grand_parent(element){
+  return element.parent().parent();
+}

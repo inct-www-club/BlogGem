@@ -20,6 +20,5 @@
             - @entryCategory.delete_at(0)
           %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => @checked}= c.name
   .form-group{:style => 'margin-top:30px;'}
-    %button{:type => 'submit', :name => 'submit', :value => 'post', :class => 'btn btn-default'}= 'Post'
-    %button{:type => 'submit', :name => 'submit', :value => 'save', :class => 'btn btn-default'}= 'Save'
-    %button{:type => 'submit', :name => 'submit', :value => 'delete', :class => 'btn btn-default', :style => 'float: right;'}= 'Delete'
+    - create_buttons().each do |property|
+      %button{property}= property['name']
