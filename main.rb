@@ -122,8 +122,8 @@ helpers do
   #Linux only
   def send_mail(body)
     title = 'Contact from Sinji\'s view'
-    to = 'contact@sinjis-view'
-    puts `echo "#{body}" | "#{title}" "#{from}"`
+    to = 'contact@sinjis-view.mydns.jp'
+    system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
   end
 
   def set_active_tab(tab_name)
@@ -172,17 +172,14 @@ helpers do
                 :name => 'Preview'}
     buttons << {:type  => 'submit',
                 :value => 'delete',
+                :submit => 'delete',
                 :class => 'btn btn-danger',
                 :target => '',
-                :onClick => "grand_parent(this).action = './post'",
+                :onClick => "post_preview(this.form, './delete', '')",
                 :style => 'float: right;',
                 :name => 'Delete'}
     return buttons
   end
-end
-
-error do |e|
-  "ERROR #{e}"
 end
 
 before do
@@ -200,7 +197,7 @@ before %r{(^/blog/|/preview$)} do
   set_active_tab('Blog')
 end
 
-before %r{^/console/(.*)} do
+before %r{^/console/} do
   @tab << Tabs.new('Console', nil, to('/console/'))
   @tab.last.style = 'float:right;'
   set_active_tab('Console')
@@ -368,6 +365,7 @@ post '/console/blog/entry/:id/post' do |id|
   else
     redirect to '/console/blog/entry/'
   end
+=begin
   if params[:submit] == 'delete' then
     Comment.where(:entry_id => entry.id).each do |comment|
       comment.destroy
@@ -375,6 +373,7 @@ post '/console/blog/entry/:id/post' do |id|
     entry.destroy
     redirect to '/console/blog/entry/'
   end
+=end
   entry.title = params[:title]
   entry.body  = params[:entry]
   entry.category = ''
@@ -388,6 +387,22 @@ post '/console/blog/entry/:id/post' do |id|
     end
   end
   entry.save
+  redirect to '/console/blog/entry/'
+end
+
+post '/console/blog/entry/:id/delete' do |id|
+  key = id.to_i
+  if key > 0 then
+    entry = Entry.find(key)
+  elsif id == 'new' then
+    entry = Entry.new
+  else
+    redirect to '/console/blog/entry/'
+  end
+  Comment.where(:entry_id => entry.id).each do |comment|
+    comment.destroy
+  end
+  entry.destroy
   redirect to '/console/blog/entry/'
 end
 
