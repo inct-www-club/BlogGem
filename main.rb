@@ -108,7 +108,6 @@ helpers do
     tabs << Tabs.new('Home', nil, to('/'))
     tabs << Tabs.new('Blog', nil, to('/blog/'))
     products = Tabs.new('Products', 'dropdown', to('/products/'))
-    products.dropdown = Array.new
     products.dropdown << Tabs.new('Coming soon!', nil, nil)
     tabs << products
     tabs << Tabs.new('Contact', nil, to('/contact/'))
@@ -184,7 +183,6 @@ end
 
 before do
   @year = Time.now.year
-  @documentRoot = '/area'
   @tab = create_tab()
 end
 

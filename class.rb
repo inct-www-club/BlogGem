@@ -25,14 +25,12 @@ class Entry < ActiveRecord::Base
 
     _body = formated.body.split(/<pre.*?pre>/)
     codes = formated.body.scan(/<pre.*?pre>/)
-    print "codes length = #{codes.length}\n"
     formated_codes = Array.new
     codes.each do |code|
       pre_head = code.scan(/<pre.*?>/).first
       code.slice!(/<pre.*?>/)
       pre_tail_array = code.scan(/<\/.*?pre>/)
       pre_tail = pre_tail_array.last
-      print "pre_tail = " + pre_tail
       code.slice!(/<\/pre>/)
       code = Rack::Utils.escape_html(code)
       code = pre_head + code + '</pre>'
@@ -96,7 +94,7 @@ class Tabs
     @css_class = css_class
     @style
     @href = href
-    @dropdown
+    @dropdown = Array.new
   end
   attr_accessor :name, :href, :dropdown, :css_class, :style
 end
