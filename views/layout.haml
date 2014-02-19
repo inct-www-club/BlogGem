@@ -33,13 +33,16 @@
               - else
                 %a{:href => t.href}= t.name
     .container
+      - adsense = '<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-7455788511289759" data-ad-slot="6524284023"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
       - if @sidebar == 'active' then
         .col-sm-9
           = yield
+          = adsense
         .col-sm-3{:style => 'margin-top:60px;'}
           = haml :_blog_sidebar
       - else
         = yield
+        = adsense
     .page-footer
       .container
         .social
