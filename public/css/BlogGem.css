@@ -65,7 +65,10 @@ body {
     color: white;
 }
 
-.nav-tabs > li > a:hover {
+.nav-tabs > li > a:hover,
+.nav-tabs > li > a:focus,
+.nav .open > a:hover,
+.nav .open > a:focus {
     background-color: #00b3b3;
     border-color: #00b3b3;
     border-bottom-color: transparent;
@@ -90,7 +93,6 @@ body {
 .btn-darkcyan:hover,
 .btn-darkcyan:focus,
 .btn-darkcyan:active,
-.btn-darkcyan.active,
 .open .dropdown-toggle.btn-darkcyan {
     color: white;
     background-color: #00b3b3;
