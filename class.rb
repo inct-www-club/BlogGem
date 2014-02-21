@@ -23,23 +23,21 @@ class Entry < ActiveRecord::Base
       formated.body = body.gsub('[read_more]', '').gsub(enter, '<br />')
     end
 
-    _body = formated.body.split(/<pre.*?pre>/)
-    codes = formated.body.scan(/<pre.*?pre>/)
-    formated_codes = Array.new
-    codes.each do |code|
-      pre_head = code.scan(/<pre.*?>/).first
-      code.slice!(/<pre.*?>/)
-      pre_tail_array = code.scan(/<\/.*?pre>/)
-      pre_tail = pre_tail_array.last
-      code.slice!(/<\/pre>/)
-      code = Rack::Utils.escape_html(code)
-      code = pre_head + code + '</pre>'
-      formated_codes << code
-    end
-
-    formated.body = ''
-    _body.each do |piece|
-      formated.body = (formated.body + piece + "#{formated_codes.shift}".gsub(Rack::Utils.escape_html('<br />'), "\n"))
+    #escape html inside the pre tag
+    pre_pattarn = /<pre(?:.|\n)*?pre>/
+    body_without_pre = formated.body.split(pre_pattarn, -1)
+    pre_tag = formated.body.scan(pre_pattarn)
+    formated.body = body_without_pre.shift
+    body_without_pre.length.times do
+      pre = pre_tag.shift
+      pre.gsub!("<br />", "\n")
+      inside_tag = pre[/>(?:.|\n)+</]
+      if inside_tag == nil then
+        inside_tag = ""
+      end
+      inside_tag = inside_tag[1, inside_tag.length - 2]
+      pre.gsub!(/>(?:.|\n)+</, ">#{Rack::Utils.escape_html(inside_tag)}<")
+      formated.body = formated.body + pre + body_without_pre.shift
     end
 
     _category_num = category.split(',')
