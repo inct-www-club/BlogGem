@@ -1,3 +1,14 @@
+class Array
+  def find_from_field(field, value)
+    self.each do |object|
+      if object.instance_variable_get(field) == value then
+        return object
+      end
+    end
+    return nil
+  end
+end
+
 class Element < ActiveRecord::Base
 end
 
@@ -86,15 +97,22 @@ end
 class Searcher < ActiveRecord::Base
 end
 
-class Tabs
-  def initialize(name, css_class, href)
+class Tab < ActiveRecord::Base
+  def format()
+    return FormatedTab.new(id, label, address)
+  end
+end
+
+class FormatedTab
+  def initialize(id, name, href, css_class=nil)
+    @id = id
     @name = name
     @css_class = css_class
     @style
     @href = href
     @dropdown = Array.new
   end
-  attr_accessor :name, :href, :dropdown, :css_class, :style
+  attr_accessor :id, :name, :href, :dropdown, :css_class, :style
 end
 
 class FormatedEntry

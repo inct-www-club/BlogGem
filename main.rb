@@ -103,6 +103,7 @@ helpers do
     end
   end
 
+=begin
   def create_tab()
     tabs = Array.new
     tabs << Tabs.new('Home', nil, to('/'))
@@ -112,6 +113,21 @@ helpers do
     tabs << products
     tabs << Tabs.new('Contact', nil, to('/contact/'))
     return tabs
+  end
+=end
+
+  def create_tab()
+    formated_tabs = Array.new
+    tabs = Tab.where(nil)
+    tabs.each do |tab|
+      if tab.parent_id == nil then
+        formated_tabs << tab.format()
+      else
+        parent_tab = formated_tabs.find_from_field("@id", tab.parent_id)
+        parent_tab.css_class = "dropdown"
+        parent_tab.dropdown << tab.format()
+      end
+    end
   end
 
   def nil_or_blank?(target)
@@ -196,9 +212,11 @@ before %r{(^/blog/|/preview$)} do
 end
 
 before %r{^/console/} do
+=begin
   @tab << Tabs.new('Console', nil, to('/console/'))
   @tab.last.style = 'float:right;'
   set_active_tab('Console')
+=end
 end
 
 get '/' do
@@ -241,23 +259,17 @@ end
 
 post '/blog/entry/:id/send-comment' do |i|
   id = i.to_i
-  if id <= 0 then
-    return
+  if Entry.find(id) != nil then
+    if ! nil_or_blank?(params[:name]) then
+      if ! nil_or_blank?(params[:body]) then
+        comment = Comment.new
+        comment.entry_id = id
+        comment.name = params[:name]
+        comment.body = params[:body]
+        comment.save
+      end
+    end
   end
-
-  if Entry.find(id) == nil then
-    return
-  end
-
-  if nil_or_blank?(params[:name]) || nil_or_blank?(params[:body])then
-    return
-  end
-
-  comment = Comment.new
-  comment.entry_id = id
-  comment.name = params[:name]
-  comment.body = params[:body]
-  comment.save
 end
 
 get '/blog/category/:category/' do |category|
@@ -287,6 +299,7 @@ post '/contact/send-mail' do
   send_mail("#{name}\n#{address}\n\n#{body}")
 end
 
+# console
 get '/console/aboutme/' do
   @element = Element.all
   @list_title = 'Element List'
@@ -363,15 +376,6 @@ post '/console/blog/entry/:id/post' do |id|
   else
     redirect to '/console/blog/entry/'
   end
-=begin
-  if params[:submit] == 'delete' then
-    Comment.where(:entry_id => entry.id).each do |comment|
-      comment.destroy
-    end
-    entry.destroy
-    redirect to '/console/blog/entry/'
-  end
-=end
   entry.title = params[:title]
   entry.body  = params[:entry]
   entry.category = ''
@@ -381,8 +385,8 @@ post '/console/blog/entry/:id/post' do |id|
       searcher.entry_id = entry.id
       searcher.category_id = c
       searcher.save
-      entry.category = "#{entry.category}#{c},"
     end
+    entry.category = params[:category].join(", ")
   end
   entry.save
   redirect to '/console/blog/entry/'
