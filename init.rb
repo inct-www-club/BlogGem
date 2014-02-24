@@ -20,10 +20,9 @@ end
 
 #set up database
 print "[set up] database\n"
-sql_file = ['entry.sql', 'element.sql', 'comment.sql', 'category.sql']
 Database.new('page.db') do |database|
-  sql_file.each do |sql|
-    database.execute(open(sql).read)
+  Dir::foreach("./sql") do |sql_file|
+    database.execute(open(sql_file).read)
   end
 end
 print "[complete] database\n"
