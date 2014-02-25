@@ -1,7 +1,5 @@
 ﻿require 'open3'
 require 'rubygems'
-require 'sqlite3'
-include SQLite3
 
 Open3.capture3('gem update -system')
 
@@ -19,10 +17,14 @@ packages.each do |package|
 end
 
 #set up database
+require 'sqlite3'
+include SQLite3
+
 print "[set up] database\n"
 Database.new('page.db') do |database|
   Dir::foreach("./sql") do |sql_file|
-    database.execute(open(sql_file).read)
+    next if sql_file == "." || sql_file == ".."
+    database.execute(open("./sql/#{sql_file}").read)
   end
 end
 print "[complete] database\n"
