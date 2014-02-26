@@ -1,10 +1,8 @@
 require 'rubygems'
 require "sinatra"
-require "sinatra/reloader"
 require 'active_record'
 require 'haml'
 
-register Sinatra::Reloader
 Encoding.default_external = 'utf-8'
 ActiveRecord::Base.default_timezone = :local
 
@@ -114,6 +112,9 @@ helpers do
     tabs << Tabs.new('Contact', nil, to('/contact/'))
     return tabs
   end
+
+  def create_tab()
+    return Array.new
 =end
 
   def create_tab()
@@ -128,6 +129,7 @@ helpers do
         parent_tab.dropdown << tab.format()
       end
     end
+    return formated_tabs
   end
 
   def nil_or_blank?(target)
@@ -336,6 +338,20 @@ post '/console/aboutme/:id/post' do |id|
   element.body  = params[:entry]
   element.save
   redirect to '/console/aboutme/'
+end
+
+get '/console/tab/' do 
+  haml :tab_edit
+end
+
+post '/console/tab/new' do
+  unless nil_or_blank?(params[:label]) || nil_or_blank?(params[:address]) then
+    tab = Tab.new
+    tab.label = params[:label]
+    tab.address = params[:address]
+    tab.save
+  end
+  redirect to "/console/tab/"
 end
 
 get '/console/blog/' do

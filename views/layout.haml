@@ -37,12 +37,12 @@
       - if @sidebar == 'active' then
         .col-sm-9
           = yield
-          = adsense
+          -#= adsense
         .col-sm-3{:style => 'margin-top:60px;'}
           = haml :_blog_sidebar
       - else
         = yield
-        = adsense
+        -#= adsense
     .page-footer
       .container
         .social

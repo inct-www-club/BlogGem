@@ -6,7 +6,7 @@ include SQLite3
 Open3.capture3('gem update -system')
 
 #install gem packages
-packages = ['sinatra', 'sqlite3', 'activerecord']
+packages = ['sinatra', 'sqlite3', 'activerecord', "haml"]
 packages.each do |package|
   print "[install] #{package}\n"
   out, err, status = Open3.capture3("gem install --no-ri --no-rdoc #{package}")
