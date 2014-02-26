@@ -213,14 +213,6 @@ before %r{(^/blog/|/preview$)} do
   set_active_tab('Blog')
 end
 
-before %r{^/console/} do
-=begin
-  @tab << Tabs.new('Console', nil, to('/console/'))
-  @tab.last.style = 'float:right;'
-  set_active_tab('Console')
-=end
-end
-
 get '/' do
   @page_title = 'Sinji\'s View 酒田　シンジの目線'
   set_active_tab('Home')
@@ -340,7 +332,8 @@ post '/console/aboutme/:id/post' do |id|
   redirect to '/console/aboutme/'
 end
 
-get '/console/tab/' do 
+get '/console/tab/' do
+  @tabs = Tab.where(nil)
   haml :tab_edit
 end
 
@@ -349,6 +342,7 @@ post '/console/tab/new' do
     tab = Tab.new
     tab.label = params[:label]
     tab.address = params[:address]
+    tab.parent_id = patams[:parent_id]
     tab.save
   end
   redirect to "/console/tab/"
