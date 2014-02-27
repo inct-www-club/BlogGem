@@ -1,8 +1,10 @@
 require 'rubygems'
-require "sinatra"
+require 'sinatra'
 require 'active_record'
 require 'haml'
+require 'sinatra/reloader'
 
+register Sinatra::Reloader
 Encoding.default_external = 'utf-8'
 ActiveRecord::Base.default_timezone = :local
 
@@ -121,7 +123,7 @@ helpers do
     formated_tabs = Array.new
     tabs = Tab.where(nil)
     tabs.each do |tab|
-      if tab.parent_id == nil then
+      if tab.parent_id == nil || tab.parent_id == 0 then
         formated_tabs << tab.format()
       else
         parent_tab = formated_tabs.find_from_field("@id", tab.parent_id)
@@ -337,12 +339,36 @@ get '/console/tab/' do
   haml :tab_edit
 end
 
+post '/console/tab/save' do
+  tabs = Tab.where(nil)
+  destroied_id = Array.new
+  tabs.each do |tab|
+    label = params[:label].shift
+    address = params[:address].shift
+    parent = params[:parent].shift
+    nob_label = nil_or_blank?(label)
+    nob_address = nil_or_blank?(address)
+    if (nob_label && nob_address) || destroied_id.include?(parent.to_i) then
+      destroied_id << tab.id
+      tab.destroy
+    elsif ! (nob_label || nob_address) then
+      tab.label = label
+      tab.address = address
+      if parent.to_i > destroied_id.size
+        tab.parent_id = parent.to_i - destroied_id.size
+      end
+      tab.save
+    end
+  end
+  redirect to "/console/tab/"
+end
+
 post '/console/tab/new' do
   unless nil_or_blank?(params[:label]) || nil_or_blank?(params[:address]) then
     tab = Tab.new
     tab.label = params[:label]
     tab.address = params[:address]
-    tab.parent_id = patams[:parent_id]
+    tab.parent_id = params[:parent]
     tab.save
   end
   redirect to "/console/tab/"
