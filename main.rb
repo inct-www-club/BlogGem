@@ -210,7 +210,7 @@ before %r{(^/blog/|/preview$)} do
   @sidebar = 'active'
   @blog_active = 'active'
   @newerEntry = Entry.order("id desc").limit(5)
-  @category = Category.all
+  @category = Category.where(nil)
   @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
   set_active_tab('Blog')
 end
@@ -218,7 +218,7 @@ end
 get '/' do
   @page_title = 'Sinji\'s View 酒田　シンジの目線'
   set_active_tab('Home')
-  @element = Element.all
+  @element = Element.where(nil)
   haml :about_me
 end
 
@@ -297,7 +297,7 @@ end
 
 # console
 get '/console/aboutme/' do
-  @element = Element.all
+  @element = Element.where(nil)
   @list_title = 'Element List'
   @add_button = 'Add Element'
   haml :element_list
@@ -380,7 +380,7 @@ get '/console/blog/' do
 end
 
 get '/console/blog/entry/' do
-  @element = Entry.order("id desc").all
+  @element = Entry.order("id desc").where(nil)
   @list_title = 'Entry List'
   @add_button = 'Add Entry'
   haml :element_list
@@ -399,7 +399,7 @@ get '/console/blog/entry/:id/' do |id|
     redirect to '/console/blog/'
   end
   @entryEdit = 'active'
-  @category = Category.all
+  @category = Category.where(nil)
   haml :edit
 end
 
@@ -461,12 +461,12 @@ post '/console/blog/entry/:id/preview' do |id|
 end
 
 get '/console/blog/category/' do
-  @category = Category.all
+  @category = Category.where(nil)
   haml :category_edit
 end
 
 post '/console/blog/category/save' do
-  @category = Category.all
+  @category = Category.where(nil)
   i = 0
   @category.each do |c|
     if params[:category][i] == '' then
@@ -488,7 +488,7 @@ post '/console/blog/category/new' do
 end
 
 get '/console/blog/comment/' do
-  @comment = Comment.all
+  @comment = Comment.where(nil)
   haml :console_comment
 end
 
