@@ -3,10 +3,16 @@ require 'sinatra'
 require 'active_record'
 require 'haml'
 require 'sinatra/reloader'
+require 'json'
 
 register Sinatra::Reloader
 Encoding.default_external = 'utf-8'
 ActiveRecord::Base.default_timezone = :local
+
+set :views, File.dirname(__FILE__) + '/views/Default'
+open("settings.json") do |io|
+  $setting = JSON.load(io)
+end
 
 load 'class.rb'
 
@@ -17,7 +23,7 @@ ActiveRecord::Base.establish_connection(
 
 helpers do
 
-  def format_array(array)
+  def format_elements(array)
     formated = Array.new
     array.each do |element|
       formated << element.format()
@@ -31,7 +37,7 @@ helpers do
 
   def show_page(pagination)
     entries = Entry.order('id desc').limit(5).offset((pagination - 1) * 5)
-    @entry = format_array(entries)
+    @entry = format_elements(entries)
 
     if @entry.size > 0 then
       if pagination == 1 then
@@ -135,8 +141,10 @@ helpers do
   end
 end
 
+
 before do
   @year = Time.now.year
+  @blog_title = $setting["blog title"]
   @newerEntry = Entry.order("id desc").limit(5)
   @category = Category.where(nil)
   @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
@@ -164,7 +172,7 @@ get '/entry/:id/' do |i|
   begin
     @entry = Entry.find(id).format_entry(false)
     @commentNum = 0
-    @comment = format_array(Comment.where(:entry_id => id, :allow => 1))
+    @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
     @page_title = @entry.title + ' - Sinji\'s View'
     haml :blog_entry
   rescue ActiveRecord::RecordNotFound
@@ -218,6 +226,16 @@ end
 get '/console/' do
   @wait_comment_num = Comment.where(:allow => 0).count
   haml :blog_console
+end
+
+get '/console/settings/' do
+  @setting = $setting
+  haml :setting
+end
+
+post '/console/settings/new' do
+  Setting.create(:item => params[:item], :value => params[:value])
+  redirect to '/console/settings/'
 end
 
 get '/console/entry/' do
