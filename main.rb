@@ -17,23 +17,11 @@ ActiveRecord::Base.establish_connection(
 
 helpers do
 
-  def format_entries(entry_array, split_body)
+  def format_array(array)
     formated = Array.new
-
-    entry_array.each do |e|
-      formated << e.format_entry(split_body)
+    array.each do |element|
+      formated << element.format()
     end
-
-    return formated
-  end
-
-  def format_comments(comment_array)
-    formated = Array.new
-
-    comment_array.each do |c|
-      formated << c.format_comment()
-    end
-
     return formated
   end
 
@@ -42,20 +30,20 @@ helpers do
   end
 
   def show_page(pagination)
-    e = Entry.order('id desc').limit(5).offset((pagination - 1) * 5)
-    @entry = format_entries(e, true)
+    entries = Entry.order('id desc').limit(5).offset((pagination - 1) * 5)
+    @entry = format_array(entries)
 
     if @entry.size > 0 then
       if pagination == 1 then
         @previousClass = 'disabled'
       elsif pagination == 2 then
-        @previousLink = to('/blog/')
+        @previousLink = to('/')
       else
-        @previousLink = to("/blog/page/#{pagination-1}/")
+        @previousLink = to("/page/#{pagination-1}/")
       end
 
       if Entry.count > 5*pagination then
-        @nextLink = to("/blog/page/#{pagination+1}/")
+        @nextLink = to("/page/#{pagination+1}/")
       else
         @nextClass = 'disabled'
       end
@@ -64,6 +52,7 @@ helpers do
     else
       haml :not_found
     end
+
   end
 
   def show_category_page(category, pagination)
@@ -101,37 +90,6 @@ helpers do
     else
       haml :not_found
     end
-  end
-
-=begin
-  def create_tab()
-    tabs = Array.new
-    tabs << Tabs.new('Home', nil, to('/'))
-    tabs << Tabs.new('Blog', nil, to('/blog/'))
-    products = Tabs.new('Products', 'dropdown', to('/products/'))
-    products.dropdown << Tabs.new('Coming soon!', nil, nil)
-    tabs << products
-    tabs << Tabs.new('Contact', nil, to('/contact/'))
-    return tabs
-  end
-
-  def create_tab()
-    return Array.new
-=end
-
-  def create_tab()
-    formated_tabs = Array.new
-    tabs = Tab.where(nil)
-    tabs.each do |tab|
-      if tab.parent_id == nil || tab.parent_id == 0 then
-        formated_tabs << tab.format()
-      else
-        parent_tab = formated_tabs.find_from_field("@id", tab.parent_id)
-        parent_tab.css_class = "dropdown"
-        parent_tab.dropdown << tab.format()
-      end
-    end
-    return formated_tabs
   end
 
   def nil_or_blank?(target)
@@ -203,49 +161,35 @@ end
 
 before do
   @year = Time.now.year
-  @tab = create_tab()
-end
-
-before %r{(^/blog/|/preview$)} do
-  @sidebar = 'active'
-  @blog_active = 'active'
   @newerEntry = Entry.order("id desc").limit(5)
   @category = Category.where(nil)
   @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
-  set_active_tab('Blog')
 end
 
 get '/' do
-  @page_title = 'Sinji\'s View 酒田　シンジの目線'
-  set_active_tab('Home')
-  @element = Element.where(nil)
-  haml :about_me
-end
-
-get '/blog/' do
   @page_title = 'Blog - Sinji\'s View'
   redirect_from_old(params[:p])
   show_page 1
 end
 
-get '/blog/page/:page/' do |p|
+get '/page/:page/' do |p|
   @page_title = 'Blog - Sinji\'s View'
   pagination = p.to_i
   if pagination < 2 then
-    redirect to '/blog/'
+    redirect to '/'
   end
   show_page pagination
 end
 
-get '/blog/entry/:id/' do |i|
+get '/entry/:id/' do |i|
   id = i.to_i
   if id <= 0 then
-    redirect to '/blog/'
+    redirect to '/'
   end
   begin
     @entry = Entry.find(id).format_entry(false)
     @commentNum = 0
-    @comment = format_comments(Comment.where(:entry_id => id, :allow => 1))
+    @comment = format_array(Comment.where(:entry_id => id, :allow => 1))
     @page_title = @entry.title + ' - Sinji\'s View'
     haml :blog_entry
   rescue ActiveRecord::RecordNotFound
@@ -253,7 +197,7 @@ get '/blog/entry/:id/' do |i|
   end
 end
 
-post '/blog/entry/:id/send-comment' do |i|
+post '/entry/:id/send-comment' do |i|
   id = i.to_i
   if Entry.find(id) != nil then
     if ! nil_or_blank?(params[:name]) then
@@ -268,16 +212,16 @@ post '/blog/entry/:id/send-comment' do |i|
   end
 end
 
-get '/blog/category/:category/' do |category|
+get '/category/:category/' do |category|
   @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
   show_category_page(category, 1)
 end
 
-get '/blog/category/:category/:pagination/' do |category, p|
+get '/category/:category/:pagination/' do |category, p|
   @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
   pagination = p.to_i
   if pagination < 2 then
-    redirect to '/blog/'
+    redirect to '/'
   end
   show_category_page(category, pagination)
 end
@@ -296,97 +240,19 @@ post '/contact/send-mail' do
 end
 
 # console
-get '/console/aboutme/' do
-  @element = Element.where(nil)
-  @list_title = 'Element List'
-  @add_button = 'Add Element'
-  haml :element_list
-end
-
-get '/console/aboutme/:id/' do |id|
-  key = id.to_i
-  if key > 0 then
-    element = Element.find(key)
-    @title = element.title
-    @body = element.body
-  elsif id != 'new' then
-    redirect to '/console/aboutme/'
-  end
-  haml :edit
-end
-
-post '/console/aboutme/:id/post' do |id|
-  key = id.to_i
-  if key > 0 then
-    element = Element.find(key)
-  elsif id == 'new' then
-    element = Element.new
-  else
-    redirect to '/console/aboutme/'
-  end
-  if params[:submit] == 'delete' then
-    element.destroy
-    redirect to '/console/aboutme/'
-  end
-  element.title = params[:title]
-  element.body  = params[:entry]
-  element.save
-  redirect to '/console/aboutme/'
-end
-
-get '/console/tab/' do
-  @tabs = Tab.where(nil)
-  haml :tab_edit
-end
-
-post '/console/tab/save' do
-  tabs = Tab.where(nil)
-  destroied_id = Array.new
-  tabs.each do |tab|
-    label = params[:label].shift
-    address = params[:address].shift
-    parent = params[:parent].shift
-    nob_label = nil_or_blank?(label)
-    nob_address = nil_or_blank?(address)
-    if (nob_label && nob_address) || destroied_id.include?(parent.to_i) then
-      destroied_id << tab.id
-      tab.destroy
-    elsif ! (nob_label || nob_address) then
-      tab.label = label
-      tab.address = address
-      if parent.to_i > destroied_id.size
-        tab.parent_id = parent.to_i - destroied_id.size
-      end
-      tab.save
-    end
-  end
-  redirect to "/console/tab/"
-end
-
-post '/console/tab/new' do
-  unless nil_or_blank?(params[:label]) || nil_or_blank?(params[:address]) then
-    tab = Tab.new
-    tab.label = params[:label]
-    tab.address = params[:address]
-    tab.parent_id = params[:parent]
-    tab.save
-  end
-  redirect to "/console/tab/"
-end
-
-get '/console/blog/' do
+get '/console/' do
   @wait_comment_num = Comment.where(:allow => 0).count
   haml :blog_console
 end
 
-get '/console/blog/entry/' do
+get '/console/entry/' do
   @element = Entry.order("id desc").where(nil)
   @list_title = 'Entry List'
   @add_button = 'Add Entry'
   haml :element_list
 end
 
-get '/console/blog/entry/:id/' do |id|
+get '/console/entry/:id/' do |id|
   key = id.to_i
   if key > 0 then
     entry = Entry.find(key)
@@ -396,21 +262,21 @@ get '/console/blog/entry/:id/' do |id|
   elsif id == 'new' then
     @entryCategory = Array.new
   else
-    redirect to '/console/blog/'
+    redirect to '/console/'
   end
   @entryEdit = 'active'
   @category = Category.where(nil)
   haml :edit
 end
 
-post '/console/blog/entry/:id/post' do |id|
+post '/console/entry/:id/post' do |id|
   key = id.to_i
   if key > 0 then
     entry = Entry.find(key)
   elsif id == 'new' then
     entry = Entry.new
   else
-    redirect to '/console/blog/entry/'
+    redirect to '/console/entry/'
   end
   entry.title = params[:title]
   entry.body  = params[:entry]
@@ -425,26 +291,26 @@ post '/console/blog/entry/:id/post' do |id|
     entry.category = params[:category].join(", ")
   end
   entry.save
-  redirect to '/console/blog/entry/'
+  redirect to '/console/entry/'
 end
 
-post '/console/blog/entry/:id/delete' do |id|
+post '/console/entry/:id/delete' do |id|
   key = id.to_i
   if key > 0 then
     entry = Entry.find(key)
   elsif id == 'new' then
     entry = Entry.new
   else
-    redirect to '/console/blog/entry/'
+    redirect to '/console/entry/'
   end
   Comment.where(:entry_id => entry.id).each do |comment|
     comment.destroy
   end
   entry.destroy
-  redirect to '/console/blog/entry/'
+  redirect to '/console/entry/'
 end
 
-post '/console/blog/entry/:id/preview' do |id|
+post '/console/entry/:id/preview' do |id|
   entry = Entry.new
   entry.title = params[:title]
   entry.body  = params[:entry]
@@ -460,12 +326,12 @@ post '/console/blog/entry/:id/preview' do |id|
   haml :blog_entry
 end
 
-get '/console/blog/category/' do
+get '/console/category/' do
   @category = Category.where(nil)
   haml :category_edit
 end
 
-post '/console/blog/category/save' do
+post '/console/category/save' do
   @category = Category.where(nil)
   i = 0
   @category.each do |c|
@@ -477,22 +343,22 @@ post '/console/blog/category/save' do
     end
     i = i+1
   end
-  redirect to '/console/blog/category/'
+  redirect to '/console/category/'
 end
 
-post '/console/blog/category/new' do
+post '/console/category/new' do
   category = Category.new
   category.name = params[:category]
   category.save
-  redirect to '/console/blog/category/'
+  redirect to '/console/category/'
 end
 
-get '/console/blog/comment/' do
+get '/console/comment/' do
   @comment = Comment.where(nil)
   haml :console_comment
 end
 
-get '/console/blog/comment/allow' do
+get '/console/comment/allow' do
   id = params[:id].to_i
   begin
     comment = Comment.find(id)
@@ -504,7 +370,7 @@ get '/console/blog/comment/allow' do
   end
 end
 
-get '/console/blog/comment/deny' do
+get '/console/comment/deny' do
   id = params[:id].to_i
   begin
     comment = Comment.find(id)

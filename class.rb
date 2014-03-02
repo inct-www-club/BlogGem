@@ -9,16 +9,13 @@ class Array
   end
 end
 
-class Element < ActiveRecord::Base
-end
-
 class Entry < ActiveRecord::Base
   def date()
     fdate = DateTime.parse("#{created_at}")
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
 
-  def format_entry(split_body)
+  def format(split_body=true)
     formated = FormatedEntry.new
 
     formated.id = id
@@ -73,7 +70,7 @@ class Comment < ActiveRecord::Base
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
 
-  def format_comment()
+  def format()
     formated = FormatedComment.new
 
     formated.id = id
@@ -95,24 +92,6 @@ class Category < ActiveRecord::Base
 end
 
 class Searcher < ActiveRecord::Base
-end
-
-class Tab < ActiveRecord::Base
-  def format()
-    return FormatedTab.new(id, label, address)
-  end
-end
-
-class FormatedTab
-  def initialize(id, name, href, css_class=nil)
-    @id = id
-    @name = name
-    @css_class = css_class
-    @style
-    @href = href
-    @dropdown = Array.new
-  end
-  attr_accessor :id, :name, :href, :dropdown, :css_class, :style
 end
 
 class FormatedEntry
