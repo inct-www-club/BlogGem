@@ -1,0 +1,17 @@
+%a{:href => to('/'), :role => 'button', :class => 'btn btn-darkcyan btn-lg btn-block'}= 'ブログトップへ'
+%h3= '記事'
+.list-group
+  - @newerEntry.each do |entry|
+    %a{:href => to("/entry/#{entry.id}/"), :class => 'list-group-item'}= entry.title
+%h3= 'コメント'
+.list-group
+  - @newerComment.each do |comment|
+    %a{:href => to("/entry/#{comment.entry_id}/"), :class => 'list-group-item'}
+      = comment.name
+      %br
+      - entry = Entry.find(comment.entry_id)
+      %small= entry.title
+%h3= 'カテゴリ'
+.list-group
+  - @category.each do |c|
+    %a{:href => to("/category/#{c.name}/"), :class => 'list-group-item'}= c.name

@@ -103,30 +103,6 @@ helpers do
     system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
   end
 
-  def set_active_tab(tab_name)
-    @tab.each do |tab|
-      if tab.name == tab_name then
-        if tab.css_class == nil then
-          tab.css_class = 'active'
-        else
-          tab.css_class = "#{tab.css_class} active"
-        end
-        return
-      end
-    end
-  end
-
-  def redirect_from_old(get_param_p)
-    if get_param_p != nil then
-      old_id = [66, 77, 91, 107, 161]
-      entry_id = old_id.index(get_param_p.to_i)
-      print entry_id
-      if entry_id != nil then
-        redirect to "/blog/entry/#{entry_id+1}/"
-      end
-    end
-  end
-
   def create_form_buttons()
     buttons = Array.new
     buttons << {:type  => 'submit',
@@ -168,7 +144,6 @@ end
 
 get '/' do
   @page_title = 'Blog - Sinji\'s View'
-  redirect_from_old(params[:p])
   show_page 1
 end
 
