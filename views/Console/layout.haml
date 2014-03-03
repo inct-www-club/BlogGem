@@ -1,0 +1,29 @@
+!!! 5
+%html{html_attrs('ja')}
+  %head
+    %meta{:charset => 'utf-8'}
+    %title= "#{@page_title}"
+    %link{:href => to('/css/bootstrap.min.css'), :rel => 'stylesheet'}
+    %link{:href => to('/css/BlogGem.css'), :rel => 'stylesheet'}
+    - if @pre_active then
+      %link{:href => to('/css/google-code-prettify/prettify.css'), :rel => 'stylesheet'}
+    /[if lt IE 9]
+      %script{:src => 'https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'}
+      %script{:src => 'https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js'}
+  %body
+    .page-header
+      .container
+        %h1
+          = @blog_title
+          %small= @sub_title
+    .container
+      = yield
+    .page-footer
+      .container
+        %p= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
+        %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
+    %script{:src => to('/js/bootstrap.min.js')}
+    %script{:src => to('/js/BlogGem.js')}
+    - if @pre_active then
+      %script{:src => to('/css/google-code-prettify/prettify.js')}
+      %script= 'prettyPrint();'

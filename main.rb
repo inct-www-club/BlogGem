@@ -27,13 +27,19 @@ ActiveRecord::Base.establish_connection(
 
 helpers do
 
-  def do_template(simbol)
+  def do_template(symbol)
     if $theme["template"] == "haml" then
-      haml simbol
+      haml symbol
     elsif $theme["template"] == "erb" then
-      erb sinbol
+      erb synbol
     else
       raise "theme error"
+    end
+  end
+
+  def console_haml(symbol)
+    render(:haml, :'../Console/layout', :layout => false) do
+      haml :"../Console/#{symbol.to_s}"
     end
   end
 
@@ -235,7 +241,7 @@ end
 # console
 get '/console/' do
   @wait_comment_num = Comment.where(:allow => 0).count
-  haml :blog_console
+  console_haml :blog_console
 end
 
 get '/console/settings/' do
