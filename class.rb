@@ -1,14 +1,3 @@
-class Array
-  def find_from_field(field, value)
-    self.each do |object|
-      if object.instance_variable_get(field) == value then
-        return object
-      end
-    end
-    return nil
-  end
-end
-
 class Entry < ActiveRecord::Base
   def date()
     fdate = DateTime.parse("#{created_at}")
@@ -17,6 +6,7 @@ class Entry < ActiveRecord::Base
 
   def format(split_body=true)
     formated = FormatedEntry.new
+    use_pre = false
 
     formated.id = id
 
@@ -35,6 +25,7 @@ class Entry < ActiveRecord::Base
     pre_pattarn = /<pre(?:.|\n)*?pre>/
     body_without_pre = formated.body.split(pre_pattarn, -1)
     pre_tag = formated.body.scan(pre_pattarn)
+    use_pre = true if pre_tag.size > 0
     formated.body = body_without_pre.shift
     body_without_pre.length.times do
       pre = pre_tag.shift
@@ -60,7 +51,7 @@ class Entry < ActiveRecord::Base
 
     formated.created_at = date()
 
-    return formated
+    return [formated, use_pre]
   end
 end
 

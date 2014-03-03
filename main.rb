@@ -26,7 +26,9 @@ helpers do
   def format_elements(array)
     formated = Array.new
     array.each do |element|
-      formated << element.format()
+      f, pre = element.format()
+      @pre_active = @pre_active || pre
+      formated << f
     end
     return formated
   end
@@ -132,7 +134,10 @@ end
 
 before do
   @year = Time.now.year
+  @since = $setting["since"]
+  @copyright = $setting["copyright"]
   @blog_title = $setting["blog title"]
+  @sub_title = $setting["sub title"]
   @newerEntry = Entry.order("id desc").limit(5)
   @category = Category.where(nil)
   @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
