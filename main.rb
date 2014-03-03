@@ -12,7 +12,6 @@ ActiveRecord::Base.default_timezone = :local
 open("settings.json") do |io|
   $setting = JSON.load(io)
 end
-set :views, File.dirname(__FILE__) + "/views/#{$setting["theme"]}"
 
 open("./views/#{$setting["theme"]}/scheme.json") do |io|
   $theme = JSON.load(io)
@@ -26,10 +25,13 @@ ActiveRecord::Base.establish_connection(
   )
 
 helpers do
+  def haml(template, options = {}, locals = {}, &block)
+    render(:haml, :"#{$setting['theme']}/#{template.to_s}", options, locals, &block)
+  end
 
   def do_template(symbol)
     if $theme["template"] == "haml" then
-      haml symbol
+      haml symbol, :layout => :"#{$setting['theme']}/layout"
     elsif $theme["template"] == "erb" then
       erb synbol
     else
@@ -38,9 +40,7 @@ helpers do
   end
 
   def console_haml(symbol)
-    render(:haml, :'../Console/layout', :layout => false) do
-      haml :"../Console/#{symbol.to_s}"
-    end
+    render(:haml, :"Console/#{symbol.to_s}", :layout => :"Console/layout")
   end
 
   def format_elements(array)
