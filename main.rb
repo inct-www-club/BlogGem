@@ -35,25 +35,26 @@ helpers do
     "<a href='#{href}'>#{name}</a>"
   end
 
+  def set_prev_and_next_link!(elements, pagination, standard_link)
+    if pagination == 1 then
+      @previousClass = 'disabled'
+    else
+      @previousLink = to("#{standard_link}#{pagination-1}/")
+    end
+
+    if elements.size <= 5 then
+      @nextClass = 'disabled'
+    else
+      @nextLink = to("#{standard_link}#{pagination+1}/")
+      elements.delete_at(5)
+    end
+  end
+
   def show_page(pagination)
-    entries = Entry.order('id desc').limit(5).offset((pagination - 1) * 5)
-    @entry = format_elements(entries)
-
-    if @entry.size > 0 then
-      if pagination == 1 then
-        @previousClass = 'disabled'
-      elsif pagination == 2 then
-        @previousLink = to('/')
-      else
-        @previousLink = to("/page/#{pagination-1}/")
-      end
-
-      if Entry.count > 5*pagination then
-        @nextLink = to("/page/#{pagination+1}/")
-      else
-        @nextClass = 'disabled'
-      end
-
+    entries = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
+    if entries.size > 0 then
+      set_prev_and_next_link!(entries, pagination, "/entry/")
+      @entry = format_elements(entries)
       haml :blogPages
     else
       haml :not_found
@@ -69,24 +70,11 @@ helpers do
       wh = {:category_id => category_info[0].id}
       searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
       if searcher.size > 0 then
-        if pagination == 1 then
-          @previousClass = 'disabled'
-        elsif pagination == 2 then
-          @previousLink = to("/blog/category/#{category}/")
-        else
-          @previousLink = to("/blog/category/#{category}/#{pagination-1}/")
-        end
-
-        if searcher.size <= 5 then
-          @nextClass = 'disabled'
-        else
-          @nextLink = to("/blog/category/#{category}/#{pagination+1}/")
-          searcher.delete_at(5)
-        end
+        set_prev_and_next_link!(searcher, pagination, "/category/#{category}/")
 
         @entry = Array.new
         searcher.each do |s|
-          @entry << Entry.find(s.entry_id).format_entry(true)
+          @entry << Entry.find(s.entry_id).format()
         end
 
         haml :blogPages
@@ -204,7 +192,7 @@ get '/category/:category/:pagination/' do |category, p|
   @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
   pagination = p.to_i
   if pagination < 2 then
-    redirect to '/'
+    redirect to "/category/#{category}"
   end
   show_category_page(category, pagination)
 end

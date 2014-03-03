@@ -7,17 +7,6 @@ class Array
     end
     return nil
   end
-
-=begin
-  def to_hash(key, value)
-    h = Hash.new
-    self.each do |object|
-      h[object.instance_variable_get(key)] = object.instance_variable_get(value)
-    end
-    return h
-  end
-=end
-
 end
 
 class Entry < ActiveRecord::Base
