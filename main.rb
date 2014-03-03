@@ -9,9 +9,13 @@ register Sinatra::Reloader
 Encoding.default_external = 'utf-8'
 ActiveRecord::Base.default_timezone = :local
 
-set :views, File.dirname(__FILE__) + '/views/Default'
 open("settings.json") do |io|
   $setting = JSON.load(io)
+end
+set :views, File.dirname(__FILE__) + "/views/#{$setting["theme"]}"
+
+open("./views/#{$setting["theme"]}/scheme.json") do |io|
+  $theme = JSON.load(io)
 end
 
 load 'class.rb'
@@ -22,6 +26,16 @@ ActiveRecord::Base.establish_connection(
   )
 
 helpers do
+
+  def do_template(simbol)
+    if $theme["template"] == "haml" then
+      haml simbol
+    elsif $theme["template"] == "erb" then
+      erb sinbol
+    else
+      raise "theme error"
+    end
+  end
 
   def format_elements(array)
     formated = Array.new
@@ -55,13 +69,12 @@ helpers do
   def show_page(pagination)
     entries = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
     if entries.size > 0 then
-      set_prev_and_next_link!(entries, pagination, "/entry/")
+      set_prev_and_next_link!(entries, pagination, "/page/")
       @entry = format_elements(entries)
-      haml :blogPages
+      do_template :blogPages
     else
       haml :not_found
     end
-
   end
 
   def show_category_page(category, pagination)
@@ -76,7 +89,9 @@ helpers do
 
         @entry = Array.new
         searcher.each do |s|
-          @entry << Entry.find(s.entry_id).format()
+          e, pre = Entry.find(s.entry_id).format()
+          @entry << e
+          @pre_active = @pre_active || pre
         end
 
         haml :blogPages
@@ -163,7 +178,8 @@ get '/entry/:id/' do |i|
     redirect to '/'
   end
   begin
-    @entry = Entry.find(id).format_entry(false)
+    @status = params[:status]
+    @entry, @pre_active = Entry.find(id).format(false)
     @commentNum = 0
     @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
     @page_title = @entry.title + ' - Sinji\'s View'
@@ -175,16 +191,17 @@ end
 
 post '/entry/:id/send-comment' do |i|
   id = i.to_i
-  if Entry.find(id) != nil then
-    if ! nil_or_blank?(params[:name]) then
-      if ! nil_or_blank?(params[:body]) then
-        comment = Comment.new
-        comment.entry_id = id
-        comment.name = params[:name]
-        comment.body = params[:body]
-        comment.save
-      end
-    end
+  name = params[:name]
+  body = params[:body]
+  if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
+    comment = Comment.new
+    comment.entry_id = id
+    comment.name = name
+    comment.body = body
+    comment.save
+    redirect to ("/entry/#{id}/?status=success") unless $theme["use Ajax"]
+  else
+    redirect to ("/entry/#{id}/?status=error") unless $theme["use Ajax"]
   end
 end
 
@@ -307,7 +324,7 @@ post '/console/entry/:id/preview' do |id|
     end
   end
   entry.created_at = Time.now
-  @entry = entry.format_entry(false)
+  @entry, @pre_active = entry.format(false)
   @comment = Array.new
   haml :blog_entry
 end

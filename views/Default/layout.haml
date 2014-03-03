@@ -23,8 +23,6 @@
         = haml :_blog_sidebar
     .page-footer
       .container
-        -#.social
-        -#  %span= "<a href=\"https://twitter.com/share\" class=\"twitter-share-button\" data-url=\"http://sinjis-view.mydns.jp\" data-text=\"Sinji's View　酒田　シンジの目線\" data-via=\"NKMR_YA\">Tweet</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>"
         %p= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
         %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
     %script{:src => to('/js/bootstrap.min.js')}
