@@ -9,16 +9,14 @@
     %textarea{:name => 'entry', :class => 'form-control', :rows => '20'}= @body
     .btn-group{:style => 'margin-top: 10px;'}
       %button{:type => 'button', :class => 'btn btn-default', :onClick => "add_str_at_cursor('entry', '[read_more]');"}= '[read_more]'
-  - if @entryEdit == 'active' then
-    .form-group
-      %label= 'Category'
-    - @category.each do |c|
-      .checkbox
-        %label
-          - if @entryCategory.size > 0 && @entryCategory[0].to_i == c.id then
-            - @checked = ''
-            - @entryCategory.delete_at(0)
-          %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => @checked}= c.name
+  .form-group
+    %label= 'Category'
+  - @category.each do |c|
+    .checkbox
+      %label
+        - if @entryCategory.size > 0 && @entryCategory.shift.to_i == c.id then
+          - @checked = ''
+        %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => @checked}= c.name
   .form-group{:style => 'margin-top:30px;'}
     - create_form_buttons().each do |property|
       %button{property}= property[:name]

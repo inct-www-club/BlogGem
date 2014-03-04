@@ -152,7 +152,6 @@ helpers do
   end
 end
 
-
 before do
   @year = Time.now.year
   @since = $setting["since"]
@@ -172,22 +171,21 @@ end
 get '/page/:page/' do |p|
   @page_title = 'Blog - Sinji\'s View'
   pagination = p.to_i
-  if pagination < 2 then
-    redirect to '/'
-  end
+
+  redirect to '/' if pagination < 2
+
   show_page pagination
 end
 
 get '/entry/:id/' do |i|
   id = i.to_i
-  if id <= 0 then
-    redirect to '/'
-  end
+  redirect to '/' if id <= 0
+
   begin
     @status = params[:status]
     @entry, @pre_active = Entry.find(id).format(false)
-    @commentNum = 0
     @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
+    @commentNum = @comment.size
     @page_title = @entry.title + ' - Sinji\'s View'
     do_template :blog_entry
   rescue ActiveRecord::RecordNotFound
@@ -215,9 +213,9 @@ end
 get '/category/:category/:pagination/' do |category, p|
   @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
   pagination = p.to_i
-  if pagination < 2 then
-    redirect to "/category/#{category}"
-  end
+
+  redirect to "/category/#{category}" if pagination < 2
+
   show_category_page(category, pagination)
 end
 
@@ -274,7 +272,6 @@ get '/console/entry/:id/' do |id|
   else
     redirect to '/console/'
   end
-  @entryEdit = 'active'
   @category = Category.where(nil)
   console_haml :edit
 end
@@ -353,9 +350,8 @@ get '/console/comment/' do
 end
 
 get '/console/comment/allow' do
-  id = params[:id].to_i
   begin
-    comment = Comment.find(id)
+    comment = Comment.find(params[:id].to_i)
     entry = Entry.find(comment.entry_id)
     comment.allow = 1
     comment.save
@@ -365,9 +361,8 @@ get '/console/comment/allow' do
 end
 
 get '/console/comment/deny' do
-  id = params[:id].to_i
   begin
-    comment = Comment.find(id)
+    comment = Comment.find(params[:id].to_i)
     entry = Entry.find(comment.entry_id)
     comment.allow = 0
     comment.save
