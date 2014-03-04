@@ -79,7 +79,7 @@ helpers do
       @entry = format_elements(entries)
       do_template :blogPages
     else
-      haml :not_found
+      do_template :not_found
     end
   end
 
@@ -100,12 +100,12 @@ helpers do
           @pre_active = @pre_active || pre
         end
 
-        haml :blogPages
+        do_template :blogPages
       else
-        haml :not_found
+        do_template :not_found
       end
     else
-      haml :not_found
+      do_template :not_found
     end
   end
 
@@ -189,9 +189,9 @@ get '/entry/:id/' do |i|
     @commentNum = 0
     @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
     @page_title = @entry.title + ' - Sinji\'s View'
-    haml :blog_entry
+    do_template :blog_entry
   rescue ActiveRecord::RecordNotFound
-    haml :not_found
+    do_template :not_found
   end
 end
 
@@ -227,15 +227,19 @@ end
 
 get '/contact/' do
   @page_title = 'Contact - Sinji\'s View'
-  set_active_tab('Contact')
-  haml :contact
+  do_template :contact
 end
 
 post '/contact/send-mail' do
-  name    = escape_html(params[:name])
-  address = escape_html(params[:address])
-  body    = escape_html(params[:body])
-  send_mail("#{name}\n#{address}\n\n#{body}")
+  begin
+    name    = escape_html(params[:name])
+    address = escape_html(params[:address])
+    body    = escape_html(params[:body])
+    send_mail("#{name}\n#{address}\n\n#{body}")
+    redirect to ('/contact/?status=success') unless $theme["use Ajax"]
+  rescue
+    redirect to ('/contact/?status=error') unless $theme["use Ajax"]
+  end
 end
 
 # console
@@ -246,7 +250,7 @@ end
 
 get '/console/settings/' do
   @setting = $setting
-  haml :setting
+  console_haml :setting
 end
 
 post '/console/settings/new' do
@@ -258,7 +262,7 @@ get '/console/entry/' do
   @element = Entry.order("id desc").where(nil)
   @list_title = 'Entry List'
   @add_button = 'Add Entry'
-  haml :element_list
+  console_haml :element_list
 end
 
 get '/console/entry/:id/' do |id|
@@ -275,7 +279,7 @@ get '/console/entry/:id/' do |id|
   end
   @entryEdit = 'active'
   @category = Category.where(nil)
-  haml :edit
+  console_haml :edit
 end
 
 post '/console/entry/:id/post' do |id|
@@ -337,7 +341,7 @@ end
 
 get '/console/category/' do
   @category = Category.where(nil)
-  haml :category_edit
+  console_haml :category_edit
 end
 
 post '/console/category/save' do
@@ -364,7 +368,7 @@ end
 
 get '/console/comment/' do
   @comment = Comment.where(nil)
-  haml :console_comment
+  console_haml :console_comment
 end
 
 get '/console/comment/allow' do

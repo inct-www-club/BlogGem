@@ -22,8 +22,9 @@
       .container
         %p= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
         %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
-    %script{:src => to('/js/bootstrap.min.js')}
-    %script{:src => to('/js/BlogGem.js')}
+    %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.js'}
+    %script{:type => "text/javascript", :src => to('/js/bootstrap.min.js')}
+    %script{:type => "text/javascript", :src => to('/js/BlogGem.js')}
     - if @pre_active then
       %script{:src => to('/css/google-code-prettify/prettify.js')}
       %script= 'prettyPrint();'
