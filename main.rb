@@ -200,11 +200,7 @@ post '/entry/:id/send-comment' do |i|
   name = params[:name]
   body = params[:body]
   if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
-    comment = Comment.new
-    comment.entry_id = id
-    comment.name = name
-    comment.body = body
-    comment.save
+    Comment.create(:entry_id => id, :name => name, :body => body)
     redirect to ("/entry/#{id}/?status=success") unless $theme["use Ajax"]
   else
     redirect to ("/entry/#{id}/?status=error") unless $theme["use Ajax"]
@@ -226,6 +222,7 @@ get '/category/:category/:pagination/' do |category, p|
 end
 
 get '/contact/' do
+  @status = params[:status]
   @page_title = 'Contact - Sinji\'s View'
   do_template :contact
 end
@@ -296,10 +293,7 @@ post '/console/entry/:id/post' do |id|
   entry.category = ''
   if params[:category] != nil then
     params[:category].each do |c|
-      searcher = Searcher.new
-      searcher.entry_id = entry.id
-      searcher.category_id = c
-      searcher.save
+      Searcher.creare(:entry_id => entry.id, :category_id => c)
     end
     entry.category = params[:category].join(", ")
   end
@@ -308,18 +302,13 @@ post '/console/entry/:id/post' do |id|
 end
 
 post '/console/entry/:id/delete' do |id|
-  key = id.to_i
-  if key > 0 then
+  if id.to_i > 0 then
     entry = Entry.find(key)
-  elsif id == 'new' then
-    entry = Entry.new
-  else
-    redirect to '/console/entry/'
+    Comment.where(:entry_id => entry.id).each do |comment|
+      comment.destroy
+    end
+    entry.destroy
   end
-  Comment.where(:entry_id => entry.id).each do |comment|
-    comment.destroy
-  end
-  entry.destroy
   redirect to '/console/entry/'
 end
 
@@ -327,16 +316,11 @@ post '/console/entry/:id/preview' do |id|
   entry = Entry.new
   entry.title = params[:title]
   entry.body  = params[:entry]
-  entry.category = ""
-  if params[:category] != nil then
-    params[:category].each do |c|
-      entry.category = "#{entry.category}#{c},"
-    end
-  end
+  entry.category = params[:category].join(",")
   entry.created_at = Time.now
   @entry, @pre_active = entry.format(false)
   @comment = Array.new
-  haml :blog_entry
+  do_template :blog_entry
 end
 
 get '/console/category/' do
@@ -346,23 +330,20 @@ end
 
 post '/console/category/save' do
   @category = Category.where(nil)
-  i = 0
   @category.each do |c|
-    if params[:category][i] == '' then
+    edited = params[:category].shift
+    if edited == "" then
       c.destroy
     else
-      c.name = params[:category][i]
+      c.name = edited
       c.save
     end
-    i = i+1
   end
   redirect to '/console/category/'
 end
 
 post '/console/category/new' do
-  category = Category.new
-  category.name = params[:category]
-  category.save
+  category = Category.create(:name => params[:category])
   redirect to '/console/category/'
 end
 
