@@ -3,8 +3,8 @@
   %head
     %meta{:charset => 'utf-8'}
     %title= "#{@page_title}"
-    %link{:href => to('/css/bootstrap.min.css'), :rel => 'stylesheet'}
-    %link{:href => to('/css/BlogGem.css'), :rel => 'stylesheet'}
+    %link{:href => to('/styles/Sample/bootstrap.min.css'), :rel => 'stylesheet'}
+    %link{:href => to('/styles/Sample/BlogGem.css'), :rel => 'stylesheet'}
     - if @pre_active then
       %link{:href => to('/css/google-code-prettify/prettify.css'), :rel => 'stylesheet'}
     /[if lt IE 9]
@@ -14,19 +14,20 @@
     .page-header
       .container
         %h1
-          = @blog_title
+          %a{:href => "/"}= @blog_title
           %small= @sub_title
     .container
       .col-sm-9
         = yield
-      .col-sm-3{:style => 'margin-top:60px;'}
+      .col-sm-3{:style => 'margin-top:30px;'}
         = haml :_blog_sidebar
     .page-footer
       .container
         %p= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
         %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
-    %script{:src => to('/js/bootstrap.min.js')}
-    %script{:src => to('/js/BlogGem.js')}
+    %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.js'}
+    %script{:type => "text/javascript", :src => to('/js/bootstrap.min.js')}
+    %script{:type => "text/javascript", :src => to('/js/BlogGem.js')}
     - if @pre_active then
       %script{:src => to('/css/google-code-prettify/prettify.js')}
       %script= 'prettyPrint();'

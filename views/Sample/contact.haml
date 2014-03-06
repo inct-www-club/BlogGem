@@ -14,12 +14,12 @@
     %form{:ole => 'form', :method => 'post', :action => './send-mail'}
       .form-group
         %label= 'お名前'
-        %input{:name => 'name', :type => 'text', :class => 'form-control', :pleceholder => 'Your name'}
+        %input.form-control{:name => 'name', :type => 'text', :pleceholder => 'Name'}
       .form-group
         %label= 'メールアドレス'
-        %input{:name => 'address', :type => 'email', :class => 'form-control', :pleceholder => 'Your name'}
+        %input.form-control{:name => 'address', :type => 'email', :pleceholder => 'Address'}
       .form-group
         %label= '本文'
-        %textarea{:name => 'body', :class => 'form-control', :rows => '15'}
+        %textarea.form-control{:name => 'body', :rows => '15'}
       .form-group
         %button.btn.btn-default{:type => 'submit'}= 'Send'
