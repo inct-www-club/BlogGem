@@ -1,30 +1,79 @@
 !!! 5
 %html{html_attrs('ja')}
   %head
-    %meta{:charset => 'utf-8'}
-    %title= "#{@page_title}"
-    %link{:href => to('/css/bootstrap.min.css'), :rel => 'stylesheet'}
-    %link{:href => to('/css/BlogGem.css'), :rel => 'stylesheet'}
-    - if @pre_active then
-      %link{:href => to('/css/google-code-prettify/prettify.css'), :rel => 'stylesheet'}
+    %meta{:charset => "UTF-8"}
+    %meta{:"http-equiv" =>"content-type", :content => "text/html"}
+    %title= "BlogGem Console"
+    %meta{:name => "generator", :content => "Bootply"}
+    %meta{:name => "viewport", :content => "width=device-width, initial-scale=1, maximum-scale=1"}
+    %link{:href => "https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css", :rel => "stylesheet"}
+    %link{:href => "/styles/Console/console.css", :rel => "stylesheet"}
     /[if lt IE 9]
-      %script{:src => 'https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'}
-      %script{:src => 'https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js'}
+      %script{:src => "https://html5shim.googlecode.com/svn/trunk/html5.js"}
   %body
-    .page-header
+    -# Header
+    .navbar.navbar-inverse.navbar-static-top{:id => "top-nav"}
       .container
-        %h1
-          = @blog_title
-          %small= @sub_title
+        .navbar-header
+          %button.navbar-toggle{:type => "button", :"data-toggle" => "collaps", :"data-target" => ".navbar-collapse"}
+            %span.icon-toggle
+          %a.navbar-brand{:href => "/console/"}= "BlogGem Console"
+        .navbar-collapse.collapse
+          %ul.nav.navbar-nav.navbar-right
+            %li
+              %a{:href =>"#"}
+                %i.glyphicon.glyphicon-user
+                = " Admin"
+            -#Logout
+            %li<
+              %a{:href => "#"}
+                %i.glyphicon.glyphicon-lock
+                = " Logout"
+
+    -# Main
     .container
-      = yield
-    .page-footer
-      .container
-        %p= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
-        %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
-    %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.js'}
-    %script{:type => "text/javascript", :src => to('/js/bootstrap.min.js')}
-    %script{:type => "text/javascript", :src => to('/js/BlogGem.js')}
-    - if @pre_active then
-      %script{:src => to('/css/google-code-prettify/prettify.js')}
-      %script= 'prettyPrint();'
+      .row
+        -# Left column
+        .col-sm-3
+          %strong
+            %i.glyphicon.glyphicon-list
+            = " Menu"
+          %hr
+            %ul.list-unstyled{:id => "userMenu"}
+              %li
+                %a{:href => "/console/"}
+                  %i.glyphicon.glyphicon-home
+                  = " Home"
+              %li
+                %a{:href => "/console/entry/"}
+                  %i.glyphicon.glyphicon-book
+                  = " Entry"
+              %li
+                %a{:href => "/console/comment/"}
+                  %i.glyphicon.glyphicon-comment
+                  = " Comments"
+                  %span.badge.badge-info= "0"
+              %li
+                %a{:href => "/console/category/"}
+                  %i.glyphicon.glyphicon-list-alt
+                  = " Category"
+              %li
+                %a{:href => "/console/setting/"}
+                  %i.glyphicon.glyphicon-cog
+                  = " Settings"
+        .col-sm-9
+          = yield
+
+    -# Footer
+    %footer.text-center
+      %div<
+        = "This console layout is compliments of "
+        %a{:href => "http://www.bootply.com/85850"}<
+          %strong= "Bootply.com"
+      %div<
+        = "This blog is powered by "
+        %a{:href => "http://sinjis-view/bloggem/"}<
+          %strong= "BlogGem"
+
+    %script{:type => "text/javascript", :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"}
+    %script{:type => "text/javascript", :src => "https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"}
