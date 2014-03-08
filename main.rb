@@ -40,7 +40,7 @@ helpers do
   end
 
   def console_haml(symbol)
-    render(:haml, :"Console/#{symbol.to_s}", :layout => :"Console/layout")
+    haml :"Console/#{symbol.to_s}", :layout => :"Console/layout"
   end
 
   def format_elements(array)

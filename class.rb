@@ -62,19 +62,15 @@ class Comment < ActiveRecord::Base
   end
 
   def format()
-    formated = FormatedComment.new
-
-    formated.id = id
-
-    formated.entry_id = entry_id
-
-    formated.name = Rack::Utils.escape_html(name)
-
-    formated.body =
-      Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />')
-
-    formated.created_at = date()
-
+    escaped_name = Rack::Utils.escape_html(name)
+    escaped_body = Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />')
+    formated = FormatedComment.new(
+      id,
+      entry_id,
+      escaped_name,
+      escaped_body,
+      date()
+      )
     return formated
   end
 end
@@ -110,12 +106,12 @@ class FormatedEntry
 end
 
 class FormatedComment
-  def initialize()
-    @id
-    @entry_id
-    @name
-    @body
-    @created_at
+  def initialize(id, entry_id, name, body, created_at)
+    @id = id
+    @entry_id = entry_id
+    @name = name
+    @body = body
+    @created_at = created_at
   end
   attr_accessor :id, :entry_id, :name, :body, :created_at
 end
