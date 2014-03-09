@@ -9,15 +9,11 @@ register Sinatra::Reloader
 Encoding.default_external = 'utf-8'
 ActiveRecord::Base.default_timezone = :local
 
-open("settings.json") do |io|
-  $setting = JSON.load(io)
-end
-
-open("./views/#{$setting["theme"]}/scheme.json") do |io|
-  $theme = JSON.load(io)
-end
-
 load 'class.rb'
+
+open("settings.json") { |io| $setting = JSON.load(io) }
+open("./views/#{$setting["theme"]}/scheme.json") { |io| $theme = JSON.load(io) }
+use Rack::Static, :urls => ["/styles"], :root => "./views/#{$setting["theme"]}"
 
 ActiveRecord::Base.establish_connection(
   "adapter" => "sqlite3",
