@@ -52,7 +52,7 @@
                 %a{:href => "/console/comment/"}
                   %i.glyphicon.glyphicon-comment
                   = " Comments"
-                  %span.badge.badge-info= "0"
+                  %span.badge.badge-info= @wait_comment_num
               %li
                 %a{:href => "/console/category/"}
                   %i.glyphicon.glyphicon-list-alt
@@ -77,3 +77,4 @@
 
     %script{:type => "text/javascript", :src => "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"}
     %script{:type => "text/javascript", :src => "https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"}
+    %script{:type => "text/javascript", :src => "/styles/Console/console.js"}

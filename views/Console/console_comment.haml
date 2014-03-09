@@ -1,15 +1,19 @@
-.comment-area
-  %h2= 'コメント'
+%strong
+  %i.glyphicon.glyphicon-comment
+  = "Comments"
+%hr
   .list-group
   - @comment.each do |c|
     .list-group-item
       - entry = Entry.find(c.entry_id)
       %p<
-        = "from:"
-        %strong= c.name
+        %i.glyphicon.glyphicon-user
+        %strong= " #{c.name}"
         %br>
-        = c.created_at
+        %i.glyphicon.glyphicon-time
+        = "&nbsp;#{c.created_at}"
         %br>
+        %i.glyphicon.glyphicon-book
         %strong= entry.title
       %p= c.body
       - if c.allow == 0 then

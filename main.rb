@@ -40,7 +40,7 @@ helpers do
   end
 
   def console_haml(symbol)
-    haml :"Console/#{symbol.to_s}", :layout => :"Console/layout"
+    render(:haml, :"Console/#{symbol.to_s}", :layout => :"Console/layout")
   end
 
   def format_elements(array)
@@ -163,6 +163,10 @@ before do
   @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
 end
 
+before /^\/console\// do
+  @wait_comment_num = Comment.where(:allow => 0).count
+end
+
 get '/' do
   @page_title = 'Blog - Sinji\'s View'
   show_page 1
@@ -239,7 +243,6 @@ end
 
 # console
 get '/console/' do
-  @wait_comment_num = Comment.where(:allow => 0).count
   console_haml :blog_console
 end
 
@@ -254,9 +257,7 @@ post '/console/settings/new' do
 end
 
 get '/console/entry/' do
-  @element = Entry.order("id desc").where(nil)
-  @list_title = 'Entry List'
-  @add_button = 'Add Entry'
+  @entry = Entry.order("id desc").where(nil)
   console_haml :element_list
 end
 

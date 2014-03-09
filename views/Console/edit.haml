@@ -1,22 +1,26 @@
-.page-header
-  %h1= 'Edit article'
 %form{:name => 'edit_form', :ole => 'form', :method => 'post', :action => './post', :onSubmit => "return check_form_dual('title', 'entry')"}
   .form-group
-    %label= 'Title'
+    %label
+      %i.glyphicon.glyphicon-th-list
+      = '&nbsp;Title'
     %input{:name => 'title', :type => 'text', :class => 'form-control', :placeholder => 'title', :value => "#{@title}"}
   .form-group
-    %label= 'Entry'
+    %label
+      %i.glyphicon.glyphicon-pencil
+      = '&nbsp;Entry'
     %textarea{:name => 'entry', :class => 'form-control', :rows => '20'}= @body
     .btn-group{:style => 'margin-top: 10px;'}
       %button{:type => 'button', :class => 'btn btn-default', :onClick => "add_str_at_cursor('entry', '[read_more]');"}= '[read_more]'
-  .form-group
-    %label= 'Category'
-  - @category.each do |c|
-    .checkbox
-      %label
-        - if @entryCategory.size > 0 && @entryCategory.shift.to_i == c.id then
-          - @checked = ''
-        %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => @checked}= c.name
+  .form-group{:style => "margin-top:20px;"}
+    %label
+      %i.glyphicon.glyphicon-tags
+      = '&nbsp;Category'
+    - @category.each do |c|
+      .checkbox
+        %label
+          - if @entryCategory.size > 0 && @entryCategory.shift.to_i == c.id then
+            - @checked = ''
+          %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => @checked}= c.name
   .form-group{:style => 'margin-top:30px;'}
     - create_form_buttons().each do |property|
       %button{property}= property[:name]
