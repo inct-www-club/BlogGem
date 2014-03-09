@@ -12,7 +12,7 @@ ActiveRecord::Base.default_timezone = :local
 load 'class.rb'
 
 open("settings.json") { |io| $setting = JSON.load(io) }
-open("./views/#{$setting["theme"]}/scheme.json") { |io| $theme = JSON.load(io) }
+open("views/#{$setting["theme"]}/scheme.json") { |io| $theme = JSON.load(io) }
 use Rack::Static, :urls => ["/styles"], :root => "./views/#{$setting["theme"]}"
 
 ActiveRecord::Base.establish_connection(
@@ -22,7 +22,8 @@ ActiveRecord::Base.establish_connection(
 
 helpers do
   def haml(template, options = {}, locals = {}, &block)
-    render(:haml, :"#{$setting['theme']}/#{template.to_s}", options, locals, &block)
+    _template = :"#{$setting['theme']}/#{template.to_s}"
+    render(:haml, _template, options, locals, &block)
   end
 
   def do_template(symbol)
@@ -149,14 +150,14 @@ helpers do
 end
 
 before do
-  @year = Time.now.year
-  @since = $setting["since"]
-  @copyright = $setting["copyright"]
-  @blog_title = $setting["blog title"]
-  @sub_title = $setting["sub title"]
-  @newerEntry = Entry.order("id desc").limit(5)
-  @category = Category.where(nil)
-  @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
+  @year          = Time.now.year
+  @since         = $setting["since"]
+  @copyright     = $setting["copyright"]
+  @blog_title    = $setting["blog title"]
+  @sub_title     = $setting["sub title"]
+  @newerEntry    = Entry.order("id desc").limit(5)
+  @category      = Category.where(nil)
+  @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
 end
 
 before /^\/console\// do
@@ -169,8 +170,8 @@ get '/' do
 end
 
 get '/page/:page/' do |p|
-  @page_title = 'Blog - Sinji\'s View'
-  pagination = p.to_i
+  @page_title  = 'Blog - Sinji\'s View'
+  pagination   = p.to_i
 
   redirect to '/' if pagination < 2
 
@@ -182,11 +183,12 @@ get '/entry/:id/' do |i|
   redirect to '/' if id <= 0
 
   begin
-    @status = params[:status]
+    @status      = params[:status]
+    @comment     = format_elements(Comment.where(:entry_id => id, :allow => 1))
+    @commentNum  = @comment.size
+    @page_title  = @entry.title + ' - Sinji\'s View'
     @entry, @pre_active = Entry.find(id).format(false)
-    @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
-    @commentNum = @comment.size
-    @page_title = @entry.title + ' - Sinji\'s View'
+
     do_template :blog_entry
   rescue ActiveRecord::RecordNotFound
     do_template :not_found
@@ -194,7 +196,7 @@ get '/entry/:id/' do |i|
 end
 
 post '/entry/:id/send-comment' do |i|
-  id = i.to_i
+  id   = i.to_i
   name = params[:name]
   body = params[:body]
   if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
