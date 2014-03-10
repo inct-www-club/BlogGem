@@ -1,7 +1,3 @@
-require 'rubygems'
-require 'sinatra'
-require 'sinatra/reloader'
+require './main'
 
-require './main.rb'
-
-run Sinatra::Application
+BlogGem.run!
