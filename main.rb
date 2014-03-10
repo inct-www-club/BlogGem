@@ -5,30 +5,49 @@ require 'haml'
 require 'json'
 
 class BlogGem < Sinatra::Base
+  def initialize(app = nil)
+    super(app)
+    @setting = load_json("settings.json")
+    @theme = set_theme!(@setting["theme"])
 
-  Encoding.default_external = 'utf-8'
-  ActiveRecord::Base.default_timezone = :local
+    Encoding.default_external = 'utf-8'
+    ActiveRecord::Base.default_timezone = :local
+    ActiveRecord::Base.establish_connection(
+      "adapter" => "sqlite3",
+      "database" => "./page.db"
+      )
+  end
+
+  def load_json(filename)
+    File.open(filename, "r") do |f|
+      JSON.load(f)
+    end
+  end
+
+  def set_theme!(theme_path)
+    theme_path = File.join("views", theme_path)
+
+    BlogGem.set(:views, theme_path)
+
+    static_url = Array.new
+    Dir.open(theme_path).each do |dir|
+      next if dir == "."
+      next if dir == ".."
+      static_url << "/#{dir}" if File.directory?( File.join(theme_path, dir) )
+    end
+    BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
+
+    return load_json( File.join(theme_path, "scheme.json") )
+  end
 
   load 'class.rb'
 
-  open("settings.json") { |io| $setting = JSON.load(io) }
-  open("views/#{$setting["theme"]}/scheme.json") { |io| $theme = JSON.load(io) }
-  set(:views, "views/#{$setting["theme"]}")
-
-  bloggem = self
-
-  use Rack::Static, :urls => ["/styles"], :root => "./views/#{$setting["theme"]}"
-
-  ActiveRecord::Base.establish_connection(
-    "adapter" => "sqlite3",
-    "database" => "./page.db"
-    )
 
   helpers do
     def do_template(symbol)
-      if $theme["template"] == "haml" then
+      if @theme["template"] == "haml" then
         haml symbol
-      elsif $theme["template"] == "erb" then
+      elsif @theme["template"] == "erb" then
         erb synbol
       else
         raise "theme error"
@@ -154,10 +173,10 @@ class BlogGem < Sinatra::Base
 
   before do
     @year          = Time.now.year
-    @since         = $setting["since"]
-    @copyright     = $setting["copyright"]
-    @blog_title    = $setting["blog title"]
-    @sub_title     = $setting["sub title"]
+    @since         = @setting["since"]
+    @copyright     = @setting["copyright"]
+    @blog_title    = @setting["blog title"]
+    @sub_title     = @setting["sub title"]
     @newerEntry    = Entry.order("id desc").limit(5)
     @category      = Category.where(nil)
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
@@ -204,9 +223,9 @@ class BlogGem < Sinatra::Base
     body = params[:body]
     if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
       Comment.create(:entry_id => id, :name => name, :body => body)
-      redirect to ("/entry/#{id}/?status=success") unless $theme["use Ajax"]
+      redirect to ("/entry/#{id}/?status=success") unless @theme["use Ajax"]
     else
-      redirect to ("/entry/#{id}/?status=error") unless $theme["use Ajax"]
+      redirect to ("/entry/#{id}/?status=error") unless @theme["use Ajax"]
     end
   end
 
@@ -236,9 +255,9 @@ class BlogGem < Sinatra::Base
       address = escape_html(params[:address])
       body    = escape_html(params[:body])
       send_mail("#{name}\n#{address}\n\n#{body}")
-      redirect to ('/contact/?status=success') unless $theme["use Ajax"]
+      redirect to ('/contact/?status=success') unless @theme["use Ajax"]
     rescue
-      redirect to ('/contact/?status=error') unless $theme["use Ajax"]
+      redirect to ('/contact/?status=error') unless @theme["use Ajax"]
     end
   end
 
@@ -248,22 +267,18 @@ class BlogGem < Sinatra::Base
   end
 
   get '/console/settings/' do
-    @setting = $setting
     console_haml :setting
   end
 
   post "/console/settings/save" do
-    $setting.clear
-    params[:item].size.times do
-      item, value = params[:item].shift, params[:value].shift
+    ary = [ params[:item], params[:value] ].transpose
+    @setting = Hash[*ary.flatten]
 
-      $setting[item] = value
-    end
-    bloggem.set(:views, "views/$settings['theme']")
+    bloggem.set_theme!(@setting['theme'])
   end
 
   post '/console/settings/new' do
-    Setting.create(:item => params[:item], :value => params[:value])
+    @setting.store(params[:item], params[:value])
     redirect to '/console/settings/'
   end
 
