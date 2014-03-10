@@ -33,7 +33,7 @@ class BlogGem < Sinatra::Base
     Dir.open(theme_path).each do |dir|
       next if dir == "."
       next if dir == ".."
-      static_url << "/#{dir}" if File.directory?( File.join(theme_path, dir) )
+      static_url << "/#{dir}"  if File.directory?( File.join(theme_path, dir) )
     end
     BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
 
@@ -92,34 +92,30 @@ class BlogGem < Sinatra::Base
         @entry = format_elements(entries)
         do_template :blogPages
       else
-        do_template :not_found
+        raise Sinatra::NotFound
       end
     end
 
     def show_category_page(category, pagination)
-      @head_title = "<small>カテゴリ</small> #{category}"
       category_info = Category.where(:name => category)
-      if category_info.size == 1 then
-        of = (pagination-1)*5
-        wh = {:category_id => category_info[0].id}
-        searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
-        if searcher.size > 0 then
-          set_prev_and_next_link!(searcher, pagination, "/category/#{category}/")
+      raise Sinatra::NotFound  unless category_info.size == 1
 
-          @entry = Array.new
-          searcher.each do |s|
-            e, pre = Entry.find(s.entry_id).format()
-            @entry << e
-            @pre_active = @pre_active || pre
-          end
+      of = (pagination-1)*5
+      wh = {:category_id => category_info[0].id}
+      searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
+      raise Sinatra::NotFound  unless searcher.size > 0
 
-          do_template :blogPages
-        else
-          do_template :not_found
-        end
-      else
-        do_template :not_found
+      set_prev_and_next_link!(searcher, pagination, "/category/#{category}/")
+
+      @entry = Array.new
+      searcher.each do |s|
+        e, pre = Entry.find(s.entry_id).format()
+        @entry << e
+        @pre_active = @pre_active || pre
       end
+
+      @head_title = "<small>カテゴリ</small> #{category}"
+      do_template :blogPages
     end
 
     def nil_or_blank?(target)
@@ -460,13 +456,11 @@ class Comment < ActiveRecord::Base
   end
 
   def format()
-    escaped_name = Rack::Utils.escape_html(name)
-    escaped_body = Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />')
     formated = FormatedComment.new(
       id,
       entry_id,
-      escaped_name,
-      escaped_body,
+      Rack::Utils.escape_html(name),
+      Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />'),
       date()
       )
     return formated
