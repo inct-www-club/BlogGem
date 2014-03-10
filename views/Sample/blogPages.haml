@@ -4,8 +4,8 @@
 - @entry.each do |e|
   - @e = e
   = haml :_tpl_blog_entry
-  %ul.pager
-    %li.previous{:class => "#{@previousClass}"}
-      %a{:href => @previousLink}!= '&larr; Newer'
-    %li.next{:class => "#{@nextClass}"}
-      %a{:href => @nextLink}!= 'Older &rarr;'
+%ul.pager
+  %li.previous{:class => "#{@previousClass}"}
+    %a{:href => @previousLink}!= '&larr; Newer'
+  %li.next{:class => "#{@nextClass}"}
+    %a{:href => @nextLink}!= 'Older &rarr;'

@@ -13,6 +13,10 @@ load 'class.rb'
 
 open("settings.json") { |io| $setting = JSON.load(io) }
 open("views/#{$setting["theme"]}/scheme.json") { |io| $theme = JSON.load(io) }
+set(:views, "views/#{$setting["theme"]}")
+
+class_self = self
+
 use Rack::Static, :urls => ["/styles"], :root => "./views/#{$setting["theme"]}"
 
 ActiveRecord::Base.establish_connection(
@@ -21,14 +25,9 @@ ActiveRecord::Base.establish_connection(
   )
 
 helpers do
-  def haml(template, options = {}, locals = {}, &block)
-    _template = :"#{$setting['theme']}/#{template.to_s}"
-    render(:haml, _template, options, locals, &block)
-  end
-
   def do_template(symbol)
     if $theme["template"] == "haml" then
-      haml symbol, :layout => :"#{$setting['theme']}/layout"
+      haml symbol
     elsif $theme["template"] == "erb" then
       erb synbol
     else
@@ -37,7 +36,11 @@ helpers do
   end
 
   def console_haml(symbol)
-    render(:haml, :"Console/#{symbol.to_s}", :layout => :"Console/layout")
+    render(
+      :haml,
+      :"/views/Console/#{symbol.to_s}",
+      :layout => :"/views/Console/layout"
+      )
   end
 
   def format_elements(array)
@@ -247,6 +250,16 @@ end
 get '/console/settings/' do
   @setting = $setting
   console_haml :setting
+end
+
+post "/console/settings/save" do
+  $setting.clear
+  params[:item].size.times do
+    item, value = params[:item].shift, params[:value].shift
+
+    $setting[item] = value
+  end
+  self.set(:views, "views/$settings['theme']")
 end
 
 post '/console/settings/new' do

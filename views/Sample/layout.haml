@@ -3,8 +3,8 @@
   %head
     %meta{:charset => 'utf-8'}
     %title= "#{@page_title}"
-    %link{:href => to('/styles/Sample/bootstrap.min.css'), :rel => 'stylesheet'}
-    %link{:href => to('/styles/Sample/BlogGem.css'), :rel => 'stylesheet'}
+    %link{:href => to('/styles/bootstrap.min.css'), :rel => 'stylesheet'}
+    %link{:href => to('/styles/BlogGem.css'), :rel => 'stylesheet'}
     - if @pre_active then
       %link{:href => to('/styles/Sample/google-code-prettify/prettify.css'), :rel => 'stylesheet'}
     /[if lt IE 9]
@@ -27,7 +27,7 @@
         %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
     %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.js'}
     %script{:type => "text/javascript", :src => to('/js/bootstrap.min.js')}
-    %script{:type => "text/javascript", :src => to('/js/BlogGem.js')}
+    -# %script{:type => "text/javascript", :src => to('/js/BlogGem.js')}
     - if @pre_active then
       %script{:src => to('/styles/Sample/google-code-prettify/prettify.js')}
       %script= 'prettyPrint();'
