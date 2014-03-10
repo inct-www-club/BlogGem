@@ -44,22 +44,18 @@ class BlogGem < Sinatra::Base
 
 
   helpers do
-    def do_template(symbol)
-      if @theme["template"] == "haml" then
-        haml symbol
-      elsif @theme["template"] == "erb" then
-        erb synbol
-      else
-        raise "theme error"
+    def do_template(template, options = {}, locals = {}, &block)
+      begin
+        public_send(@theme["template"], template, options, locals, &block)
+      rescue
+        raise "template error"
       end
     end
 
-    def console_haml(symbol)
-      render(
-        :haml,
-        :"/views/Console/#{symbol.to_s}",
-        :layout => :"/views/Console/layout"
-        )
+    def console_haml(template, options = {}, locals = {}, &block)
+      haml_template    = :"/views/Console/#{template.to_s}"
+      options[:layout] = :"/views/Console/layout"
+      render(:haml, haml_template, options, locals, &block)
     end
 
     def format_elements(array)
