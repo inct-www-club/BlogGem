@@ -53,8 +53,8 @@ class BlogGem < Sinatra::Base
     end
 
     def console_haml(template, options = {}, locals = {}, &block)
-      haml_template    = :"/views/Console/#{template.to_s}"
-      options[:layout] = :"/views/Console/layout"
+      haml_template    = :"../Console/#{template.to_s}"
+      options[:layout] = :"../Console/layout"
       render(:haml, haml_template, options, locals, &block)
     end
 
