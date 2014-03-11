@@ -7,8 +7,8 @@ require 'json'
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
     super(app)
-    @setting = load_json("settings.json")
-    @theme = set_theme!(@setting["theme"])
+    @setting = BlogGem.load_json("settings.json")
+    @theme = BlogGem.set_theme!(@setting["theme"])
 
     Encoding.default_external = 'utf-8'
     ActiveRecord::Base.default_timezone = :local
@@ -18,26 +18,28 @@ class BlogGem < Sinatra::Base
       )
   end
 
-  def load_json(filename)
-    File.open(filename, "r") do |f|
-      JSON.load(f)
+  class << self
+    def load_json(filename)
+      File.open(filename, "r") do |f|
+        JSON.load(f)
+      end
     end
-  end
 
-  def set_theme!(theme_path)
-    theme_path = File.join("views", theme_path)
+    def set_theme!(theme_path)
+      theme_path = File.join("views", theme_path)
 
-    BlogGem.set(:views, theme_path)
+      BlogGem.set(:views, theme_path)
 
-    static_url = Array.new
-    Dir.open(theme_path).each do |dir|
-      next if dir == "."
-      next if dir == ".."
-      static_url << "/#{dir}"  if File.directory?( File.join(theme_path, dir) )
+      static_url = Array.new
+      Dir.open(theme_path).each do |dir|
+        next if dir == "."
+        next if dir == ".."
+        static_url << "/#{dir}"  if File.directory?( File.join(theme_path, dir) )
+      end
+      BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
+
+      return load_json( File.join(theme_path, "scheme.json") )
     end
-    BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
-
-    return load_json( File.join(theme_path, "scheme.json") )
   end
 
 
@@ -195,15 +197,16 @@ class BlogGem < Sinatra::Base
     redirect to '/' if id <= 0
 
     begin
-      @status      = params[:status]
-      @comment     = format_elements(Comment.where(:entry_id => id, :allow => 1))
-      @commentNum  = @comment.size
-      @page_title  = @entry.title + ' - Sinji\'s View'
+      @status = params[:status]
+      @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
+      @commentNum = @comment.size
+
       @entry, @pre_active = Entry.find(id).format(false)
+      @page_title = @entry.title + ' - Sinji\'s View'
 
       do_template :blog_entry
-    rescue ActiveRecord::RecordNotFound
-      do_template :not_found
+    rescue
+      raise Sinatra::NotFound
     end
   end
 
