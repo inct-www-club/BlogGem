@@ -8,7 +8,11 @@ class BlogGem < Sinatra::Base
   def initialize(app = nil)
     super(app)
     @setting = BlogGem.load_json("settings.json")
-    @theme = BlogGem.set_theme!(@setting["theme"])
+    theme_path = File.join("views", @setting["theme"])
+    @theme = BlogGem.load_json( File.join(theme_path, "scheme.json") )
+
+    BlogGem.set_theme!(@setting["theme"])
+    BlogGem.set_static_dirs!("views/Console", "/console")
 
     Encoding.default_external = 'utf-8'
     ActiveRecord::Base.default_timezone = :local
@@ -25,20 +29,22 @@ class BlogGem < Sinatra::Base
       end
     end
 
-    def set_theme!(theme_path)
-      theme_path = File.join("views", theme_path)
-
+    def set_theme!(theme)
+      theme_path = File.join("views", theme)
       BlogGem.set(:views, theme_path)
+      BlogGem.set_static_dirs!(theme_path, "/")
+    end
 
+    def set_static_dirs!(theme_path, standard_url)
       static_url = Array.new
       Dir.open(theme_path).each do |dir|
         next if dir == "."
         next if dir == ".."
-        static_url << "/#{dir}"  if File.directory?( File.join(theme_path, dir) )
+        if File.directory?( File.join(theme_path, dir) ) then
+          static_url << File.join(standard_url, dir)
+        end
       end
       BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
-
-      return load_json( File.join(theme_path, "scheme.json") )
     end
   end
 
