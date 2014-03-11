@@ -1,0 +1,33 @@
+!!! 5
+%html{html_attrs('ja')}
+  %head
+    %meta{:charset => 'utf-8'}
+    %title= "#{@page_title}"
+    %link{:href => to('/css/bootstrap.min.css'), :rel => 'stylesheet'}
+    %link{:href => to('/css/BlogGem.css'), :rel => 'stylesheet'}
+    - if @pre_active then
+      %link{:href => to('/google-code-prettify/prettify.css'), :rel => 'stylesheet'}
+    /[if lt IE 9]
+      %script{:src => 'https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'}
+      %script{:src => 'https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js'}
+  %body
+    .page-header
+      .container
+        %h1
+          %a{:href => "/"}= @blog_title
+          %small= @sub_title
+    .container
+      .col-sm-9
+        = yield
+      .col-sm-3{:style => 'margin-top:30px;'}
+        = haml :_blog_sidebar
+    .page-footer
+      .container
+        %p= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
+        %p= "Powered by #{link_to('http://sinjis-view.mydns.jp/BlogGem/', 'BlogGem')}."
+    %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.min.js'}
+    %script{:type => "text/javascript", :src => to('/js/bootstrap.min.js')}
+    %script{:type => "text/javascript", :src => to('/js/BlogGem.js')}
+    - if @pre_active then
+      %script{:src => to('/google-code-prettify/prettify.js')}
+      %script= 'prettyPrint();'
