@@ -12,7 +12,7 @@ class BlogGem < Sinatra::Base
     @theme = BlogGem.load_json( File.join(theme_path, "scheme.json") )
 
     BlogGem.set_theme!(@setting["theme"])
-    BlogGem.set_static_dirs!("views/Console", "/console")
+    BlogGem.set_static_dirs!("views/Console")
 
     Encoding.default_external = 'utf-8'
     ActiveRecord::Base.default_timezone = :local
@@ -32,17 +32,15 @@ class BlogGem < Sinatra::Base
     def set_theme!(theme)
       theme_path = File.join("views", theme)
       BlogGem.set(:views, theme_path)
-      BlogGem.set_static_dirs!(theme_path, "/")
+      BlogGem.set_static_dirs!(theme_path)
     end
 
-    def set_static_dirs!(theme_path, standard_url)
+    def set_static_dirs!(theme_path)
       static_url = Array.new
       Dir.open(theme_path).each do |dir|
         next if dir == "."
         next if dir == ".."
-        if File.directory?( File.join(theme_path, dir) ) then
-          static_url << File.join(standard_url, dir)
-        end
+        static_url << "/#{dir}"  if File.directory?( File.join(theme_path, dir) )
       end
       BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
     end
@@ -179,10 +177,6 @@ class BlogGem < Sinatra::Base
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
   end
 
-  before /^\/console\// do
-    @wait_comment_num = Comment.where(:allow => 0).count
-  end
-
   get '/' do
     @page_title = 'Blog - Sinji\'s View'
     show_page 1
@@ -260,10 +254,16 @@ class BlogGem < Sinatra::Base
   end
 
   # console
+  before /^\/console\// do
+    @wait_comment_num = Comment.where(:allow => 0).count
+  end
+
+  #home
   get '/console/' do
     console_haml :blog_console
   end
 
+  #settings
   get '/console/settings/' do
     console_haml :setting
   end
@@ -280,6 +280,7 @@ class BlogGem < Sinatra::Base
     redirect to '/console/settings/'
   end
 
+  #entry
   get '/console/entry/' do
     @entry = Entry.order("id desc").where(nil)
     console_haml :element_list
@@ -345,6 +346,7 @@ class BlogGem < Sinatra::Base
     do_template :blog_entry
   end
 
+  #categoty
   get '/console/category/' do
     @category = Category.where(nil)
     console_haml :category_edit
@@ -369,8 +371,9 @@ class BlogGem < Sinatra::Base
     redirect to '/console/category/'
   end
 
+  #comment
   get '/console/comment/' do
-    @comment = Comment.where(nil)
+    @comment = Comment.order("id desc")
     console_haml :console_comment
   end
 
