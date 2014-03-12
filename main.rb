@@ -64,15 +64,6 @@ class BlogGem < Sinatra::Base
   end
 
   class << self
-    def init_system()
-      begin
-        gem "rubyzip2"
-      rescue LoadError
-        system("gem install rubyzip2")
-        Gem.clear_paths
-      end
-    end
-
     def load_json(filename)
       File.open(filename, "r") do |f|
         JSON.load(f)
@@ -317,7 +308,7 @@ class BlogGem < Sinatra::Base
     File.open('public/uploads/' + params[:file][:filename], "w") do |f|
       f.write(params[:file][:tempfile].read)
     end
-    return "The file was successfully uploaded!"
+    return "Complete upload to <strong>/uploads/" + params[:file][:filename] + "</strong>"
   end
 
 

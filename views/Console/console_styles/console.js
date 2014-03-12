@@ -122,29 +122,6 @@ function grand_parent(element){
   return element.parentNode.parentNode;
 }
 
-/*
-
-function file_submit(){
-  $("#upload_form").submit(function(){
-    var $form, fd;
-    $form = $(this);
-    fd = new FormData($form[0]);
-    $.ajax($form.attr("action"), {
-      type: 'post',
-      processData: false,
-      contentType: false,
-      data: fd,
-      dataType: 'html',
-      success: function(data){
-        console.log(data);
-      }
-    });
-    return false;
-  });
-}
-*/
-
-
 $(function(){
 
   $("#update").bind("click", function(){
@@ -167,9 +144,18 @@ $(function(){
       contentType : false
     };
 
+    var success = document.getElementById('success');
+
     // ajax送信
-    $.ajax( "/console/upload", postData ).done(function( text ){
-      alert( text );
+    $.ajax(
+      "/console/upload", postData
+    ).done(function(text){
+      success.innerHTML = text;
+      $("#success").slideDown();
+      $("#error").slideUp();
+    }).fail(function(text){
+      $("#error").slideDown();
+      $("#success").slideUp();
     });
 
   });
