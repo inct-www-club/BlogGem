@@ -1,126 +1,10 @@
 require 'rubygems'
-require 'active_record'
-require 'bcrypt'
-
-class User < ActiveRecord::Base
-  attr_readonly :password_hash, :password_salt
-
-  def encrypt_password(password)
-    if password.present?
-      self.password_salt = BCrypt::Engine.generate_salt
-      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
-    end
-  end
-
-  def self.authenticate(user_id, password)
-    user = User.find(user_id)
-    if user && user.password_hash == BCrypt::Engine.hash_secret(password, user.password_salt)
-      user
-    else
-      nil
-    end
-  end
-end
-
-class FormatedEntry
-  def initialize()
-    @id
-    @title
-    @body
-    @read_more = false
-    @category = Array.new
-    @comment_num
-    @created_at
-  end
-  attr_accessor(
-    :id,
-    :title,
-    :body,
-    :read_more,
-    :category,
-    :comment_num,
-    :created_at
-    )
-end
-
-class FormatedComment
-  def initialize(id, entry_id, name, body, created_at)
-    @id = id
-    @entry_id = entry_id
-    @name = name
-    @body = body
-    @created_at = created_at
-  end
-  attr_accessor :id, :entry_id, :name, :body, :created_at
-end
-
-if ARGV[0] == "init" then
-  packages = ['sinatra', 'sqlite3', 'activerecord', "haml", "bcrypt"]
-  packages.each do |package|
-    begin
-      print "check #{package}..."
-
-      gem package
-
-      print "OK\n"
-    rescue LoadError
-      print "NO\n"
-      print "installing #{package}..."
-
-      system("gem install #{package}")
-      Gem.clear_paths
-
-      print "OK\n"
-    end
-  end
-
-
-  require "sqlite3"
-  include SQLite3
-
-  print "make database..."
-  Database.new('page.db') do |database|
-    Dir::foreach("./sql") do |sql_file|
-      next if sql_file == "." || sql_file == ".."
-      database.execute(open("./sql/#{sql_file}").read)
-    end
-  end
-  print "OK\n"
-
-  print "make directories..."
-  dirs = ["public", "public/uploads"]
-  dirs.each { |dir| Dir::mkdir(dir) }
-  print "OK\n"
-
-  #sign up first user
-  require 'active_record'
-  require 'io/console'
-  ActiveRecord::Base.establish_connection(
-  "adapter" => "sqlite3",
-  "database" => "./page.db"
-  )
-  print "user id?:"
-  id = STDIN.gets().chomp
-  print "user name?:"
-  name = STDIN.gets().chomp
-  begin
-    print "password?:"
-    password = STDIN.noecho(&:gets).chomp
-    print "conform pasword:"
-  end while password != STDIN.noecho(&:gets).chomp
-
-  user = User.new(:id => id, :name => name)
-  user.encrypt_password(password)
-  raise "Sing up error" unless user.save
-
-  exit(3)
-end
-
 require 'sinatra'
 require 'active_record'
 require 'haml'
 require 'json'
 require 'bcrypt'
+require "sqlite3"
 
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
@@ -143,6 +27,44 @@ class BlogGem < Sinatra::Base
   end
 
   class << self
+    def init()
+      require 'io/console'
+      include SQLite3
+
+      print "make database..."
+      Database.new('page.db') do |database|
+        Dir::foreach("./sql") do |sql_file|
+          next if sql_file == "." || sql_file == ".."
+          database.execute(open("./sql/#{sql_file}").read)
+        end
+      end
+      print "OK\n"
+
+      print "make directories..."
+      dirs = ["public", "public/uploads"]
+      dirs.each { |dir| Dir::mkdir(dir) }
+      print "OK\n"
+
+      #sign up first user
+      ActiveRecord::Base.establish_connection(
+        "adapter" => "sqlite3",
+        "database" => "./page.db"
+        )
+      print "user id?:"
+      id = STDIN.gets().chomp
+      print "user name?:"
+      name = STDIN.gets().chomp
+      begin
+        print "password?:"
+        password = STDIN.noecho(&:gets).chomp
+        print "conform pasword:"
+      end while password != STDIN.noecho(&:gets).chomp
+
+      user = User.new(:id => id, :name => name)
+      user.encrypt_password(password)
+      raise "Sing up error" unless user.save
+    end
+
     def load_json(filename)
       File.open(filename, "r") do |f|
         JSON.load(f)
