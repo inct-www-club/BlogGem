@@ -316,7 +316,7 @@ class BlogGem < Sinatra::Base
     entry.category = ''
     if params[:category] != nil then
       params[:category].each do |c|
-        Searcher.creare(:entry_id => entry.id, :category_id => c)
+        Searcher.create(:entry_id => entry.id, :category_id => c)
       end
       entry.category = params[:category].join(", ")
     end
