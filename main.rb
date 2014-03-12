@@ -1,4 +1,45 @@
 require 'rubygems'
+
+if ARGV[0] == "init" then
+  packages = ['sinatra', 'sqlite3', 'activerecord', "haml"]
+  packages.each do |package|
+    begin
+      print "check #{package}..."
+
+      gem package
+
+      print "OK\n"
+    rescue LoadError
+      print "NO\n"
+      print "installing #{package}..."
+
+      system("gem install #{package}")
+      Gem.clear_paths
+
+      print "OK\n"
+    end
+  end
+
+  require "sqlite3"
+  include SQLite3
+
+  print "make database..."
+  Database.new('page.db') do |database|
+    Dir::foreach("./sql") do |sql_file|
+      next if sql_file == "." || sql_file == ".."
+      database.execute(open("./sql/#{sql_file}").read)
+    end
+  end
+  print "OK\n"
+
+  print "make directories..."
+  dirs = ["public", "public/uploads"]
+  dirs.each { |dir| Dir::mkdir(dir) }
+  print "OK\n"
+
+  exit(3)
+end
+
 require 'sinatra'
 require 'active_record'
 require 'haml'
@@ -23,6 +64,15 @@ class BlogGem < Sinatra::Base
   end
 
   class << self
+    def init_system()
+      begin
+        gem "rubyzip2"
+      rescue LoadError
+        system("gem install rubyzip2")
+        Gem.clear_paths
+      end
+    end
+
     def load_json(filename)
       File.open(filename, "r") do |f|
         JSON.load(f)
