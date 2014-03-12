@@ -121,3 +121,57 @@ function post_preview(form, action, blank){
 function grand_parent(element){
   return element.parentNode.parentNode;
 }
+
+/*
+
+function file_submit(){
+  $("#upload_form").submit(function(){
+    var $form, fd;
+    $form = $(this);
+    fd = new FormData($form[0]);
+    $.ajax($form.attr("action"), {
+      type: 'post',
+      processData: false,
+      contentType: false,
+      data: fd,
+      dataType: 'html',
+      success: function(data){
+        console.log(data);
+      }
+    });
+    return false;
+  });
+}
+*/
+
+
+$(function(){
+
+  $("#update").bind("click", function(){
+
+    // FormData オブジェクトを作成
+    var fd = new FormData();
+
+    // テキストデータおよびアップロードファイルが設定されていれば追加
+    fd.append( "status", $("#status").val() );
+    if ( $("#file").val() !== '' ) {
+      fd.append( "file", $("#file").prop("files")[0] );
+    }
+
+    // dataにFormDataを指定する場合 processData,contentTypeをfalseにしてjQueryがdataを処理しないようにする
+    var postData = {
+      type : "POST",
+      dataType : "text",
+      data : fd,
+      processData : false,
+      contentType : false
+    };
+
+    // ajax送信
+    $.ajax( "/console/upload", postData ).done(function( text ){
+      alert( text );
+    });
+
+  });
+
+});

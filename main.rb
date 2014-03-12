@@ -263,6 +263,14 @@ class BlogGem < Sinatra::Base
     console_haml :blog_console
   end
 
+  post "/console/upload" do
+    File.open('public/uploads/' + params[:file][:filename], "w") do |f|
+      f.write(params[:file][:tempfile].read)
+    end
+    return "The file was successfully uploaded!"
+  end
+
+
   #settings
   get '/console/settings/' do
     console_haml :setting

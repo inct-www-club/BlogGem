@@ -24,3 +24,11 @@
   .form-group{:style => 'margin-top:30px;'}
     - create_form_buttons().each do |property|
       %button{property}= property[:name]
+%div{:style => "margin-top:40px"}
+  %form.form-inline{:action => "javascript:;"}
+    %label
+      = "File upload"
+    .form-group
+      %input.form-control{:type => "file", :id => "file"}
+    %button.btn.btn-default{:id => "update", :type => "submit"}
+      = "Upload"
