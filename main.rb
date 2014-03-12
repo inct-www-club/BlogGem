@@ -1,7 +1,61 @@
 require 'rubygems'
+require 'active_record'
+require 'bcrypt'
+
+class User < ActiveRecord::Base
+  attr_readonly :password_hash, :password_salt
+
+  def encrypt_password(password)
+    if password.present?
+      self.password_salt = BCrypt::Engine.generate_salt
+      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
+    end
+  end
+
+  def self.authenticate(user_id, password)
+    user = User.find(user_id)
+    if user && user.password_hash == BCrypt::Engine.hash_secret(password, user.password_salt)
+      user
+    else
+      nil
+    end
+  end
+end
+
+class FormatedEntry
+  def initialize()
+    @id
+    @title
+    @body
+    @read_more = false
+    @category = Array.new
+    @comment_num
+    @created_at
+  end
+  attr_accessor(
+    :id,
+    :title,
+    :body,
+    :read_more,
+    :category,
+    :comment_num,
+    :created_at
+    )
+end
+
+class FormatedComment
+  def initialize(id, entry_id, name, body, created_at)
+    @id = id
+    @entry_id = entry_id
+    @name = name
+    @body = body
+    @created_at = created_at
+  end
+  attr_accessor :id, :entry_id, :name, :body, :created_at
+end
 
 if ARGV[0] == "init" then
-  packages = ['sinatra', 'sqlite3', 'activerecord', "haml"]
+  packages = ['sinatra', 'sqlite3', 'activerecord', "haml", "bcrypt"]
   packages.each do |package|
     begin
       print "check #{package}..."
@@ -20,6 +74,7 @@ if ARGV[0] == "init" then
     end
   end
 
+
   require "sqlite3"
   include SQLite3
 
@@ -37,6 +92,27 @@ if ARGV[0] == "init" then
   dirs.each { |dir| Dir::mkdir(dir) }
   print "OK\n"
 
+  #sign up first user
+  require 'active_record'
+  require 'io/console'
+  ActiveRecord::Base.establish_connection(
+  "adapter" => "sqlite3",
+  "database" => "./page.db"
+  )
+  print "user id?:"
+  id = STDIN.gets().chomp
+  print "user name?:"
+  name = STDIN.gets().chomp
+  begin
+    print "password?:"
+    password = STDIN.noecho(&:gets).chomp
+    print "conform pasword:"
+  end while password != STDIN.noecho(&:gets).chomp
+
+  user = User.new(:id => id, :name => name)
+  user.encrypt_password(password)
+  raise "Sing up error" unless user.save
+
   exit(3)
 end
 
@@ -44,6 +120,7 @@ require 'sinatra'
 require 'active_record'
 require 'haml'
 require 'json'
+require 'bcrypt'
 
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
@@ -54,6 +131,8 @@ class BlogGem < Sinatra::Base
 
     BlogGem.set_theme!(@setting["theme"])
     BlogGem.set_static_dirs!("views/Console")
+    BlogGem.enable :sessions
+    BlogGem.set :session_secret, "My session secret"
 
     Encoding.default_external = 'utf-8'
     ActiveRecord::Base.default_timezone = :local
@@ -294,8 +373,38 @@ class BlogGem < Sinatra::Base
     end
   end
 
+  #Sign in
+  get "/sign_in" do
+    redirect to '/console/'  if session[:user_id]
+
+    @sidebar = :hidden
+    console_haml :sign_in
+  end
+
+  post "/sign_in" do
+    redirect to '/console/'  if session[:user_id]
+
+    user = User.authenticate(params[:id], params[:password])
+    if user
+      session[:user_id] = user.id
+      redirect to '/console/'
+    else
+      redirect to "/sign_in?status=error"
+    end
+  end
+
+  get "/sign_out" do
+    session[:user_id] = nil
+    redirect to "/sign_in"
+  end
+
+
   # console
   before /^\/console\// do
+    unless session[:user_id]
+      redirect to "/sign_in"
+    end
+    @user = User.find(session[:user_id])
     @wait_comment_num = Comment.where(:allow => 0).count
   end
 
@@ -531,6 +640,26 @@ class Category < ActiveRecord::Base
 end
 
 class Searcher < ActiveRecord::Base
+end
+
+class User < ActiveRecord::Base
+  attr_readonly :password_hash, :password_salt
+
+  def encrypt_password(password)
+    if password.present?
+      self.password_salt = BCrypt::Engine.generate_salt
+      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
+    end
+  end
+
+  def self.authenticate(user_id, password)
+    user = User.find(user_id)
+    if user && user.password_hash == BCrypt::Engine.hash_secret(password, user.password_salt)
+      user
+    else
+      nil
+    end
+  end
 end
 
 class FormatedEntry

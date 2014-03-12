@@ -1,0 +1,19 @@
+.col-md-3
+.col-md-6
+  - if params[:status] == "error"
+    .alert.alert-danger
+      %strong= 'Error.'
+      = 'Prease check your ID and Password.'
+  .panel.panel-primary
+    .panel-heading
+      %strong= "Sing in"
+    .panel-body
+      %form{:action => '/sign_in', :method => 'post'}
+        .form-group
+          %label{:for => "id"} ID:
+          %input.form-control{:name => "id", :type => "text", :value => ""}
+        .form-group
+          %label{:for => "password"} Password:
+          %input.form-control{:name => "password", :type => "password", :value => ""}
+        %button.btn.btn-default{:type => "submit", :value => "sign in"}= "Sign in"
+.col-md-3

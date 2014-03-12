@@ -18,51 +18,55 @@
           %button.navbar-toggle{:type => "button", :"data-toggle" => "collaps", :"data-target" => ".navbar-collapse"}
             %span.icon-toggle
           %a.navbar-brand{:href => "/console/"}= "BlogGem Console"
-        .navbar-collapse.collapse
-          %ul.nav.navbar-nav.navbar-right
-            %li
-              %a{:href =>"#"}
-                %i.glyphicon.glyphicon-user
-                = " Admin"
-            -#Logout
-            %li<
-              %a{:href => "#"}
-                %i.glyphicon.glyphicon-lock
-                = " Logout"
+        - if @user
+          .navbar-collapse.collapse
+            %ul.nav.navbar-nav.navbar-right
+              %li
+                %a{:href =>"#"}
+                  %i.glyphicon.glyphicon-user
+                  = " #{@user.name}"
+              -#Logout
+              %li<
+                %a{:href => to("/sign_out")}
+                  %i.glyphicon.glyphicon-lock
+                  = " Sign out"
 
     -# Main
     .container
-      .row
-        -# Left column
-        .col-sm-3
-          %strong
-            %i.glyphicon.glyphicon-list
-            = " Menu"
-          %hr
-            %ul.list-unstyled{:id => "userMenu"}
-              %li
-                %a{:href => "/console/"}
-                  %i.glyphicon.glyphicon-home
-                  = " Home"
-              %li
-                %a{:href => "/console/entry/"}
-                  %i.glyphicon.glyphicon-book
-                  = " Entry"
-              %li
-                %a{:href => "/console/comment/"}
-                  %i.glyphicon.glyphicon-comment
-                  = " Comments"
-                  %span.badge.badge-info= @wait_comment_num
-              %li
-                %a{:href => "/console/category/"}
-                  %i.glyphicon.glyphicon-list-alt
-                  = " Category"
-              %li
-                %a{:href => "/console/setting/"}
-                  %i.glyphicon.glyphicon-cog
-                  = " Settings"
-        .col-sm-9
-          = yield
+      - unless @sidebar then
+        .row
+          -# Left column
+          .col-sm-3
+            %strong
+              %i.glyphicon.glyphicon-list
+              = " Menu"
+            %hr
+              %ul.list-unstyled{:id => "userMenu"}
+                %li
+                  %a{:href => "/console/"}
+                    %i.glyphicon.glyphicon-home
+                    = " Home"
+                %li
+                  %a{:href => "/console/entry/"}
+                    %i.glyphicon.glyphicon-book
+                    = " Entry"
+                %li
+                  %a{:href => "/console/comment/"}
+                    %i.glyphicon.glyphicon-comment
+                    = " Comments"
+                    %span.badge.badge-info= @wait_comment_num
+                %li
+                  %a{:href => "/console/category/"}
+                    %i.glyphicon.glyphicon-list-alt
+                    = " Category"
+                %li
+                  %a{:href => "/console/setting/"}
+                    %i.glyphicon.glyphicon-cog
+                    = " Settings"
+          .col-sm-9
+            = yield
+      - else
+        = yield
 
     -# Footer
     %footer.text-center
