@@ -43,26 +43,30 @@
             %hr
               %ul.list-unstyled{:id => "userMenu"}
                 %li
-                  %a{:href => "/console/"}
+                  %a{:href => to("/console/")}
                     %i.glyphicon.glyphicon-home
                     = " Home"
                 %li
-                  %a{:href => "/console/entry/"}
+                  %a{:href => to("/console/entry/")}
                     %i.glyphicon.glyphicon-book
                     = " Entry"
                 %li
-                  %a{:href => "/console/comment/"}
+                  %a{:href => to("/console/comment/")}
                     %i.glyphicon.glyphicon-comment
                     = " Comments"
                     %span.badge.badge-info= @wait_comment_num
                 %li
-                  %a{:href => "/console/category/"}
+                  %a{:href => to("/console/category/")}
                     %i.glyphicon.glyphicon-list-alt
                     = " Category"
                 %li
-                  %a{:href => "/console/setting/"}
+                  %a{:href => to("/console/settings/")}
                     %i.glyphicon.glyphicon-cog
                     = " Settings"
+                %li
+                  %a{:href => to("/console/membars/")}
+                    %i.glyphicon.glyphicon-user
+                    = " Membars"
           .col-sm-9
             = yield
       - else

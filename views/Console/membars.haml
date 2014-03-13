@@ -1,0 +1,43 @@
+%strong
+  %i.glyphicon.glyphicon-user
+  = " Membars"
+%hr
+  %table.table
+    %thead
+      %tr
+        %th= "ID"
+        %th= "Name"
+        %th= ""
+    %tbody
+      - @membars.each do |membar|
+        - className = "success" if membar.id == session[:user_id]
+        %tr{:id => membar.id, :class => className}
+          %td= membar.id
+          %td= membar.name
+          %td
+            - if className then
+              %strong= "You!"
+            - else
+              %button.btn.btn-danger.btn-xs{:name => membar.id, :onClick => "javascript:leave_membar(this)"}= "leave"
+
+%strong
+  %i.glyphicon.glyphicon-saved
+  = "Add Membar"
+%hr
+  %form{:role => 'form', :action => './add', :method => 'post'}
+    .form-group
+      %label= "ID:"
+      %input.form-control{:name => "id", :type => "text", :value => ""}
+    .form-group
+      %label= "Name:"
+      %input.form-control{:name => "name", :type => "text", :value => ""}
+    .form-group
+      %label= "Password:"
+      %input.form-control{:name => "password", :type => "password", :value => ""}
+    .form-group
+      %label= "Confirm Password:"
+      %input.form-control{:name =>  "confirm_password", :type => "password", :value => ""}
+    .form-group
+      %button.btn.btn-primary{:type => "submit"}
+        %i.glyphicon.glyphicon-ok
+        = "Add Membar"

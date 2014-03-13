@@ -94,7 +94,7 @@ function send_mail(){
 }
 
 function allow_comment(button){
-  del_button = document.getElementsByName(button.name)[1]
+  var del_button = document.getElementsByName(button.name)[1]
   button.blur()
   $.ajax(
     "./allow?id="+button.name
@@ -107,7 +107,7 @@ function allow_comment(button){
 }
 
 function deny_comment(button){
-  del_button = document.getElementsByName(button.name)[1]
+  var del_button = document.getElementsByName(button.name)[1]
   button.blur()
   $.ajax(
     "./deny?id="+button.name
@@ -121,12 +121,29 @@ function deny_comment(button){
 
 function delete_comment(button){
   button.blur()
-  comment = document.getElementById(button.name)
+  var comment = document.getElementById(button.name)
   $.ajax(
     "./delete?id="+button.name
   ).done(function(text){
     $(comment).hide("nomal", function(){
       $(comment).remove();
+    });
+  });
+}
+
+function leave_membar(button){
+  button.blur()
+  var target_tr = document.getElementById(button.name)
+
+  var post_data = {
+    type: "POST",
+    data: { id: button.name }
+  }
+  $.ajax(
+    "./leave", post_data
+  ).done(function(text){
+    $(target_tr).hide("nomal", function(){
+      $(target_tr).remove();
     });
   });
 }
