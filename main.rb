@@ -29,10 +29,9 @@ class BlogGem < Sinatra::Base
   class << self
     def init()
       require 'io/console'
-      include SQLite3
 
       print "make database..."
-      Database.new('page.db') do |database|
+      SQLite3::Database.new('page.db') do |database|
         Dir::foreach("./sql") do |sql_file|
           next if sql_file == "." || sql_file == ".."
           database.execute(open("./sql/#{sql_file}").read)
@@ -91,11 +90,11 @@ class BlogGem < Sinatra::Base
 
   helpers do
     def do_template(template, options = {}, locals = {}, &block)
-      begin
+      #begin
         public_send(@theme["template"], template, options, locals, &block)
-      rescue
-        raise "template error"
-      end
+      #rescue
+      #  raise "template error"
+      #end
     end
 
     def console_haml(template, options = {}, locals = {}, &block)
@@ -215,7 +214,7 @@ class BlogGem < Sinatra::Base
     @blog_title    = @setting["blog title"]
     @sub_title     = @setting["sub title"]
     @newerEntry    = Entry.order("id desc").limit(5)
-    @category      = Category.where(nil)
+    @category      = Category.order(number: :asc)
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
   end
 
@@ -430,26 +429,29 @@ class BlogGem < Sinatra::Base
 
   #categoty
   get '/console/category/' do
-    @category = Category.where(nil)
+    @category = Category.order(number: :asc)
     console_haml :category_edit
   end
 
   post '/console/category/save' do
     @category = Category.where(nil)
-    @category.each do |c|
+    params[:category].size.times do |number|
+      category = Category.find(params[:id].shift.to_i)
       edited = params[:category].shift
       if edited == "" then
-        c.destroy
+        category.destroy
       else
-        c.name = edited
-        c.save
+        category.name = edited
+        category.number = number
+        category.save
       end
     end
     redirect to '/console/category/'
   end
 
   post '/console/category/new' do
-    category = Category.create(:name => params[:category])
+    number = Category.count()
+    category = Category.create(:name => params[:category], :number => number)
     redirect to '/console/category/'
   end
 

@@ -17,82 +17,6 @@ function check_form(input_area){
 	return true;
 }
 
-function check_email_address(input_area){
-  if(check_form(input_area)){
-    if(!input_area.value.match(/.+@.+\..+/)){
-      var alert_area = input_area.parentNode;
-      alert_area.className += ' alert alert-danger';
-      return false;
-    }
-    else{
-      return true;
-    }
-  }
-  return false;
-}
-
-function post_comment(){
-  var name = document.getElementsByName('name')[0];
-  var body = document.getElementsByName('body')[0];
-
-  var succsess = document.getElementsByName('succsess')[0];
-  var error = document.getElementsByName('error')[0];
-
-  var n = check_form(name);
-  var b = check_form(body);
-
-  if (n && b){
-    $.post('./send-comment', {
-      name: name.value,
-      body: body.value
-    }, function(){
-      name.value = '';
-      body.value = '';
-      $(succsess).slideDown();
-      $(error).slideUp();
-    })
-  }
-  else{
-    $(succsess).slideUp();
-    $(error).slideDown();
-  }
-
-  return true;
-}
-
-function send_mail(){
-  var name = document.getElementsByName('name')[0];
-  var address = document.getElementsByName('address')[0];
-  var body = document.getElementsByName('body')[0];
-
-  var succsess = document.getElementsByName('succsess')[0];
-  var error = document.getElementsByName('error')[0];
-
-  var n = check_form(name);
-  var a = check_email_address(address);
-  var b = check_form(body);
-
-  if (n && a && b){
-    $.post('./send-mail', {
-      name: name.value,
-      address: address.value,
-      body: body.value
-    }, function(){
-      name.value = '';
-      address.value = '';
-      body.value = '';
-      $(succsess).slideDown();
-      $(error).slideUp();
-    })
-  }
-  else{
-    $(succsess).slideUp();
-    $(error).slideDown();
-  }
-
-  return true;
-}
-
 function allow_comment(button){
   var del_button = document.getElementsByName(button.name)[1]
   button.blur()
@@ -146,6 +70,24 @@ function leave_membar(button){
       $(target_tr).remove();
     });
   });
+}
+
+function up_category(button){
+  $target = $(button).parent();
+  $target.slideUp('middle', function(){
+    $target.insertBefore($target.prev());
+    $target.slideDown();
+  });
+  button.blur();
+}
+
+function down_category(button){
+  $target = $(button).parent();
+  $target.slideUp('middle', function(){
+    $target.insertAfter($target.next());
+    $target.slideDown();
+  });
+  button.blur();
 }
 
 function post_preview(form, action, blank){

@@ -1,14 +1,19 @@
-.page-header
-  %h1= 'Category Edit'
-%form{:role => 'form', :method => 'post', :action => './save'}
-  - @category.each do |c|
+%strong
+  %i.glyphicon.glyphicon-tags
+  = " Category"
+%hr
+  %form{:role => 'form', :method => 'post', :action => './save'}
+    - @category.each do |c|
+      .form-group{:id => c.id}
+        %input.form-control{:name => 'category[]', :type => 'text', :value => c.name}
+        %input{:type => "hidden", :name => 'id[]', :value => c.id}
+        %button.btn.btn-default{:type => "button", :onClick => "javascript:up_category(this)"}= "Up"
+        %button.btn.btn-default{:type => "button", :onClick => "javascript:down_category(this)"}= "Down"
+        %button.btn.btn-danger{:type => "button", :style => "float:right;"}= "Delete"
+    %button.btn.btn-primary{:type => 'submit', :value => 'save'}= 'Save'
+  %form{:role => 'form', :method => 'post', :action => './new', :style =>'margin-top:30px;'}
     .form-group
-      %input.form-control{:name => 'category[]', :type => 'text', :value => c.name}
-  .form-group
-    %button.btn.btn-default{:type => 'submit', :value => 'save'}= 'Save'
-%form{:role => 'form', :method => 'post', :action => './new', :style =>'margin-top:30px;'}
-  .form-group
-    %label= 'Add category'
-    %input.form-control{:name => 'category', :type => 'text'}
-  .form-group
-    %button.btn.btn-default{:type => 'submit', :value => 'add'}= 'Add'
+      %label= 'Add category'
+      %input.form-control{:name => 'category', :type => 'text'}
+    .form-group
+      %button.btn.btn-default{:type => 'submit', :value => 'add'}= 'Add'
