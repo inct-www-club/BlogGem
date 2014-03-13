@@ -94,23 +94,41 @@ function send_mail(){
 }
 
 function allow_comment(button){
-  $.get('./allow', {
-    id: button.id,
-  }, function(){
+  del_button = document.getElementsByName(button.name)[1]
+  button.blur()
+  $.ajax(
+    "./allow?id="+button.name
+  ).done(function(text){
     button.className = 'btn btn-default';
-    button.onClick = 'deny_comment(this)';
+    button.onclick = new Function("deny_comment(this)");
     button.innerHTML = '公開中';
-  })
+    $(del_button).slideUp();
+  });
 }
 
 function deny_comment(button){
-  $.get('./deny', {
-    id: button.id,
-  }, function(){
+  del_button = document.getElementsByName(button.name)[1]
+  button.blur()
+  $.ajax(
+    "./deny?id="+button.name
+  ).done(function(text){
     button.className = 'btn btn-warning';
-    button.onClick = 'allow_comment(this)';
+    button.onclick = new Function("allow_comment(this)");
     button.innerHTML = '承認する';
-  })
+    $(del_button).slideDown();
+  });
+}
+
+function delete_comment(button){
+  button.blur()
+  comment = document.getElementById(button.name)
+  $.ajax(
+    "./delete?id="+button.name
+  ).done(function(text){
+    $(comment).hide("nomal", function(){
+      $(comment).remove();
+    });
+  });
 }
 
 function post_preview(form, action, blank){

@@ -255,8 +255,10 @@ class BlogGem < Sinatra::Base
     id   = i.to_i
     name = params[:name]
     body = params[:body]
+    allow = 0
+    allow = 1 if @setting["comment approval"]
     if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
-      Comment.create(:entry_id => id, :name => name, :body => body)
+      Comment.create(:entry_id => id, :name => name, :body => body, :allow => allow)
       redirect to ("/entry/#{id}/?status=success") unless @theme["use Ajax"]
     else
       redirect to ("/entry/#{id}/?status=error") unless @theme["use Ajax"]
@@ -478,6 +480,13 @@ class BlogGem < Sinatra::Base
         entry.comment_num -= 1
         entry.save
       end
+    end
+  end
+
+  get '/console/comment/delete' do
+    begin
+      comment = Comment.find(params[:id].to_i)
+      comment.destroy
     end
   end
 end

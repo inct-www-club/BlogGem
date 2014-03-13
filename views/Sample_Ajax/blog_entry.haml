@@ -15,7 +15,9 @@
   %div
     .alert.alert-success{:id => 'success', :style => 'display:none;'}
       %strong= 'Complete'
-      = 'コメントの送信が完了しました。コメントは管理者の承認後、公開されます。'
+      = 'コメントの送信が完了しました。'
+      - unless @setting["comment approval"]
+        = 'コメントは管理者の承認後、公開されます。'
     .alert.alert-danger{:id => 'error', :style => 'display:none;'}
       %strong= 'Error'
       = 'すべての項目を入力してください。'

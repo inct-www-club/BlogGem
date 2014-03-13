@@ -4,7 +4,7 @@
 %hr
   .list-group
   - @comment.each do |c|
-    .list-group-item
+    .list-group-item{:id => c.id}
       - entry = Entry.find(c.entry_id)
       %p<
         %i.glyphicon.glyphicon-user
@@ -16,12 +16,15 @@
         %i.glyphicon.glyphicon-book
         %strong= entry.title
       %p= c.body
+      - denying = "float:right;"
       - if c.allow == 0 then
         - button_class = 'btn btn-warning'
         - button_label = '承認する'
-        - button_script = 'allow_comment(this)'
+        - button_script = 'javascript:allow_comment(this)'
       - else
         - button_class = 'btn btn-default'
         - button_label = '公開中'
         - button_script = 'deny_comment(this)'
-      %button{:id => c.id, :class => button_class, :onClick => button_script}= button_label
+        - denying += " display:none;"
+      %button{:name => c.id, :class => button_class, :onClick => button_script}= button_label
+      %button.btn.btn-danger{:name => c.id, :style => denying, :onClick => "delete_comment(this)"}= "Delete"
