@@ -132,6 +132,8 @@ class BlogGem < Sinatra::Base
     end
 
     def show_page(pagination)
+      @page_title  = @setting["blog title"]
+
       @entry = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
       raise Sinatra::NotFound if @entry.size == 0
 
@@ -146,6 +148,8 @@ class BlogGem < Sinatra::Base
     end
 
     def show_category_page(category, pagination)
+      @page_title = "Category:#{categoty} - #{@settings["blog title"]}"
+
       category_info = Category.where(:name => category)
       raise Sinatra::NotFound  unless category_info.size == 1
 
@@ -173,8 +177,8 @@ class BlogGem < Sinatra::Base
 
     #Linux only
     def send_mail(body)
-      title = 'Contact from Sinji\'s view'
-      to = 'contact@sinjis-view.mydns.jp'
+      title = "Contact from #{@settings["blog title"]}"
+      to = @settings["mail"]
       system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
     end
 
@@ -222,12 +226,10 @@ class BlogGem < Sinatra::Base
   end
 
   get '/' do
-    @page_title = 'Blog - Sinji\'s View'
     show_page 1
   end
 
   get '/page/:page/' do |p|
-    @page_title  = 'Blog - Sinji\'s View'
     pagination   = p.to_i
 
     redirect to '/' if pagination < 2
@@ -244,7 +246,6 @@ class BlogGem < Sinatra::Base
       @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
       @commentNum = @comment.size
 
-      #@entry, @pre_active = Entry.find(id).format(false)
       @entry = Entry.find(id)
       @entry.text(false)
       @pre_active = @entry.include_pre?
@@ -271,12 +272,10 @@ class BlogGem < Sinatra::Base
   end
 
   get '/category/:category/' do |category|
-    @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
     show_category_page(category, 1)
   end
 
   get '/category/:category/:pagination/' do |category, p|
-    @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
     pagination = p.to_i
 
     redirect to "/category/#{category}" if pagination < 2
@@ -286,7 +285,7 @@ class BlogGem < Sinatra::Base
 
   get '/contact/' do
     @status = params[:status]
-    @page_title = 'Contact - Sinji\'s View'
+    @page_title = "Contact - #{@settings["blog title"]}"
     do_template :contact
   end
 
