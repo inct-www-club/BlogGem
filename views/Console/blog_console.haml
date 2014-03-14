@@ -1,0 +1,7 @@
+.list-group
+  %a{:href => to('/console/entry/'), :class => 'list-group-item'}= 'entry'
+  %a{:href => to('/console/category/'), :class => 'list-group-item'}= 'category'
+  %a{:href => to('/console/comment/'), :class => 'list-group-item'}
+    = 'Comment'
+    %span.badge.pull-right= "#{@wait_comment_num}"
+  %a{:href => to('/console/category/'), :class => 'list-group-item'}= 'setting'

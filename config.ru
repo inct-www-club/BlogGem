@@ -1,7 +1,7 @@
-require 'rubygems'
-require 'sinatra'
-require 'sinatra/reloader'
+require './main'
 
-require './main.rb'
-
-run Sinatra::Application
+if ARGV[0] == "init" then
+  BlogGem.init
+else
+  BlogGem.run!
+end

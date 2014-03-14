@@ -1,0 +1,12 @@
+%strong
+  %i.glyphicon.glyphicon-book
+  = " Entry"
+%hr
+  %div{:style => 'padding-bottom:10px;'}
+    %a{:href => './new/'}
+      %button{:type => 'button', :class => 'btn btn-primary btn-lg'}
+        %i.glyphicon.glyphicon-pencil
+        = " Write a new entry"
+  .list-group
+    - @entry.each do |e|
+      %a{:href => "./#{e.id}/", :class => 'list-group-item'}= escape_html(e.title)

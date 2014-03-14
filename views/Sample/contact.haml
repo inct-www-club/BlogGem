@@ -1,0 +1,25 @@
+.comment-area
+  .page-header
+    %h1= 'Mail form'
+  %p= '酒田　シンジにご用の際は、下記メールフォームよりご連絡ください。'
+  %div{:style => 'margin-top:20px;'}
+    - if @status == "success" then
+      .alert.alert-success
+        %strong= 'Complete'
+        = 'メールの送信が完了しました。'
+    - elsif @status == "error" then
+      .alert.alert-danger
+        %strong= 'Error'
+        = '入力項目を確認してください。'
+    %form{:ole => 'form', :method => 'post', :action => './send-mail'}
+      .form-group
+        %label= 'お名前'
+        %input.form-control{:name => 'name', :type => 'text', :pleceholder => 'Name'}
+      .form-group
+        %label= 'メールアドレス'
+        %input.form-control{:name => 'address', :type => 'email', :pleceholder => 'Address'}
+      .form-group
+        %label= '本文'
+        %textarea.form-control{:name => 'body', :rows => '15'}
+      .form-group
+        %button.btn.btn-default{:type => 'submit'}= 'Send'

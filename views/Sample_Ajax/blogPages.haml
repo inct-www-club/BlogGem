@@ -1,0 +1,11 @@
+- if @head_title != nil then
+  .page-header
+    %h1= @head_title
+- @entry.each do |e|
+  - @e = e
+  = haml :_tpl_blog_entry
+%ul.pager
+  %li.previous{:class => "#{@previousClass}"}
+    %a{:href => @previousLink}!= '&larr; Newer'
+  %li.next{:class => "#{@nextClass}"}
+    %a{:href => @nextLink}!= 'Older &rarr;'

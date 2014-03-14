@@ -1,0 +1,34 @@
+- if @status == "success" then
+  .alert.alert-success
+    %strong= 'Complete'
+    = 'コメントの送信が完了しました。'
+    - unless @setting["comment approval"]
+      = 'コメントは管理者の承認後、公開されます。'
+- if @status == "error" then
+  .alert.alert-danger
+    %strong= 'Error'
+    = 'すべての項目を入力してください。'
+- @e = @entry
+!= haml :_tpl_blog_entry
+- if @comment.size > 0 then
+  .comment-area
+    %h2= 'コメント'
+    - @comment.each do |c|
+      .panel.panel-default
+        .panel-heading= c.name
+        .panel-body
+          %p= c.body
+          %br
+          = c.created_at
+.comment-area
+  %h2= 'コメントを書く'
+  %div
+    %form{:name => 'edit_form', :ole => 'form', :method => 'post', :action => './send-comment'}
+      .form-group
+        %label= '名前'
+        %input{:name => 'name', :type => 'text', :class => 'form-control', :pleceholder => 'Your name'}
+      .form-group
+        %label= 'コメント'
+        %textarea{:name => 'body', :class => 'form-control', :rows => '10'}
+      .form-group
+        %button.btn.btn-default{:type => 'submit'}= 'Send'

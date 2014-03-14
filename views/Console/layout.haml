@@ -1,0 +1,88 @@
+!!! 5
+%html{html_attrs('ja')}
+  %head
+    %meta{:charset => "UTF-8"}
+    %meta{:"http-equiv" =>"content-type", :content => "text/html"}
+    %title= "BlogGem Console"
+    %meta{:name => "generator", :content => "Bootply"}
+    %meta{:name => "viewport", :content => "width=device-width, initial-scale=1, maximum-scale=1"}
+    %link{:href => "https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css", :rel => "stylesheet"}
+    %link{:href => to("/console_styles/console.css"), :rel => "stylesheet"}
+    /[if lt IE 9]
+      %script{:src => "https://html5shim.googlecode.com/svn/trunk/html5.js"}
+  %body
+    -# Header
+    .navbar.navbar-inverse.navbar-static-top{:id => "top-nav"}
+      .container
+        .navbar-header
+          %button.navbar-toggle{:type => "button", :"data-toggle" => "collaps", :"data-target" => ".navbar-collapse"}
+            %span.icon-toggle
+          %a.navbar-brand{:href => "/console/"}= "BlogGem Console"
+        - if @user
+          .navbar-collapse.collapse
+            %ul.nav.navbar-nav.navbar-right
+              %li
+                %a{:href =>"#"}
+                  %i.glyphicon.glyphicon-user
+                  = " #{@user.name}"
+              -#Logout
+              %li<
+                %a{:href => to("/sign_out")}
+                  %i.glyphicon.glyphicon-lock
+                  = " Sign out"
+
+    -# Main
+    .container
+      - unless @sidebar then
+        .row
+          -# Left column
+          .col-sm-3
+            %strong
+              %i.glyphicon.glyphicon-list
+              = " Menu"
+            %hr
+              %ul.list-unstyled{:id => "userMenu"}
+                %li
+                  %a{:href => to("/console/")}
+                    %i.glyphicon.glyphicon-home
+                    = " Home"
+                %li
+                  %a{:href => to("/console/entry/")}
+                    %i.glyphicon.glyphicon-book
+                    = " Entry"
+                %li
+                  %a{:href => to("/console/comment/")}
+                    %i.glyphicon.glyphicon-comment
+                    = " Comments"
+                    %span.badge.badge-info= @wait_comment_num
+                %li
+                  %a{:href => to("/console/category/")}
+                    %i.glyphicon.glyphicon-list-alt
+                    = " Category"
+                %li
+                  %a{:href => to("/console/settings/")}
+                    %i.glyphicon.glyphicon-cog
+                    = " Settings"
+                %li
+                  %a{:href => to("/console/membars/")}
+                    %i.glyphicon.glyphicon-user
+                    = " Membars"
+          .col-sm-9
+            = yield
+      - else
+        = yield
+
+    -# Footer
+    %footer.text-center
+      %div<
+        = "This console layout is compliments of "
+        %a{:href => "http://www.bootply.com/85850"}<
+          %strong= "Bootply.com"
+      %div<
+        = "This blog is powered by "
+        %a{:href => "http://sinjis-view/bloggem/"}<
+          %strong= "BlogGem"
+
+    %script{:type => "text/javascript", :src => "https://code.jquery.com/jquery.min.js"}
+    %script{:type => "text/javascript", :src => "https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"}
+    %script{:type => "text/javascript", :src => to("/console_styles/console.js")}

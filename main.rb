@@ -1,483 +1,654 @@
 require 'rubygems'
-require "sinatra"
-require "sinatra/reloader"
+require 'sinatra'
 require 'active_record'
 require 'haml'
+require 'json'
+require 'bcrypt'
+require "sqlite3"
 
-register Sinatra::Reloader
-Encoding.default_external = 'utf-8'
-ActiveRecord::Base.default_timezone = :local
+class BlogGem < Sinatra::Base
+  def initialize(app = nil)
+    super(app)
+    @setting = BlogGem.load_json("settings.json")
+    theme_path = File.join("views", @setting["theme"])
+    @theme = BlogGem.load_json( File.join(theme_path, "scheme.json") )
 
-load 'class.rb'
+    BlogGem.set_theme!(@setting["theme"])
+    BlogGem.set_static_dirs!("views/Console")
+    BlogGem.enable :sessions
+    BlogGem.set :session_secret, "My session secret"
 
-ActiveRecord::Base.establish_connection(
-  "adapter" => "sqlite3",
-  "database" => "./page.db"
-  )
+    Encoding.default_external = 'utf-8'
+    ActiveRecord::Base.default_timezone = :local
+    ActiveRecord::Base.establish_connection(
+      "adapter" => "sqlite3",
+      "database" => "./page.db"
+      )
+  end
 
-helpers do
+  class << self
+    def init()
+      require 'io/console'
 
-  def format_entries(entry_array, split_body)
-    formated = Array.new
+      print "make database..."
+      SQLite3::Database.new('page.db') do |database|
+        Dir::foreach("./sql") do |sql_file|
+          next if sql_file == "." || sql_file == ".."
+          database.execute(open("./sql/#{sql_file}").read)
+        end
+      end
+      print "OK\n"
 
-    entry_array.each do |e|
-      formated << e.format_entry(split_body)
+      print "make directories..."
+      dirs = ["public", "public/uploads"]
+      dirs.each do |dir|
+        Dir::mkdir(dir) unless File.directory?(dir)
+      end
+      print "OK\n"
+
+      #sign up first user
+      ActiveRecord::Base.establish_connection(
+        "adapter" => "sqlite3",
+        "database" => "./page.db"
+        )
+      print "user id?:"
+      id = STDIN.gets().chomp
+      print "user name?:"
+      name = STDIN.gets().chomp
+      begin
+        print "password?:"
+        password = STDIN.noecho(&:gets).chomp
+        print "\nconform pasword:"
+      end while password != STDIN.noecho(&:gets).chomp
+
+      user = User.new(:id => id, :name => name)
+      user.encrypt_password(password)
+      raise "Sing up error" unless user.save
     end
 
-    return formated
-  end
-
-  def format_comments(comment_array)
-    formated = Array.new
-
-    comment_array.each do |c|
-      formated << c.format_comment()
+    def load_json(filename)
+      File.open(filename, "r") do |f|
+        JSON.load(f)
+      end
     end
 
-    return formated
+    def set_theme!(theme)
+      theme_path = File.join("views", theme)
+      BlogGem.set(:views, theme_path)
+      BlogGem.set_static_dirs!(theme_path)
+    end
+
+    def set_static_dirs!(theme_path)
+      static_url = Array.new
+      Dir.open(theme_path).each do |dir|
+        next if dir == "."
+        next if dir == ".."
+        static_url << "/#{dir}"  if File.directory?( File.join(theme_path, dir) )
+      end
+      BlogGem.use(Rack::Static, :urls => static_url, :root => theme_path)
+    end
   end
 
-  def link_to(href, name)
-    "<a href='#{href}'>#{name}</a>"
-  end
 
-  def show_page(pagination)
-    e = Entry.order('id desc').limit(5).offset((pagination - 1) * 5)
-    @entry = format_entries(e, true)
+  helpers do
+    def do_template(template, options = {}, locals = {}, &block)
+      public_send(@theme["template"], template, options, locals, &block)
+    end
 
-    if @entry.size > 0 then
+    def console_haml(template, options = {}, locals = {}, &block)
+      options[:views] = "views/Console"
+      haml(template, options, locals, &block)
+    end
+
+    def format_elements(array)
+      formated = Array.new
+      array.each do |element|
+        f, pre = element.format()
+        @pre_active = @pre_active || pre
+        formated << f
+      end
+      return formated
+    end
+
+    def link_to(href, name)
+      "<a href='#{href}'>#{name}</a>"
+    end
+
+    def set_prev_and_next_link!(elements, pagination, standard_link)
       if pagination == 1 then
         @previousClass = 'disabled'
-      elsif pagination == 2 then
-        @previousLink = to('/blog/')
       else
-        @previousLink = to("/blog/page/#{pagination-1}/")
+        @previousLink = to("#{standard_link}#{pagination-1}/")
       end
 
-      if Entry.count > 5*pagination then
-        @nextLink = to("/blog/page/#{pagination+1}/")
-      else
+      if elements.size <= 5 then
         @nextClass = 'disabled'
+      else
+        @nextLink = to("#{standard_link}#{pagination+1}/")
+        elements.delete_at(5)
       end
-
-      haml :blogPages
-    else
-      haml :not_found
     end
-  end
 
-  def show_category_page(category, pagination)
-    @head_title = "<small>カテゴリ</small> #{category}"
-    category_info = Category.where(:name => category)
-    if category_info.size == 1 then
+    def show_page(pagination)
+      entries = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
+      if entries.size > 0 then
+        set_prev_and_next_link!(entries, pagination, "/page/")
+        @entry = format_elements(entries)
+        do_template :blogPages
+      else
+        raise Sinatra::NotFound
+      end
+    end
+
+    def show_category_page(category, pagination)
+      category_info = Category.where(:name => category)
+      raise Sinatra::NotFound  unless category_info.size == 1
+
       of = (pagination-1)*5
       wh = {:category_id => category_info[0].id}
       searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
-      if searcher.size > 0 then
-        if pagination == 1 then
-          @previousClass = 'disabled'
-        elsif pagination == 2 then
-          @previousLink = to("/blog/category/#{category}/")
-        else
-          @previousLink = to("/blog/category/#{category}/#{pagination-1}/")
-        end
+      raise Sinatra::NotFound  unless searcher.size > 0
 
-        if searcher.size <= 5 then
-          @nextClass = 'disabled'
-        else
-          @nextLink = to("/blog/category/#{category}/#{pagination+1}/")
-          searcher.delete_at(5)
-        end
+      set_prev_and_next_link!(searcher, pagination, "/category/#{category}/")
 
-        @entry = Array.new
-        searcher.each do |s|
-          @entry << Entry.find(s.entry_id).format_entry(true)
-        end
-
-        haml :blogPages
-      else
-        haml :not_found
+      @entry = Array.new
+      searcher.each do |s|
+        e, pre = Entry.find(s.entry_id).format()
+        @entry << e
+        @pre_active = @pre_active || pre
       end
+
+      @head_title = "<small>カテゴリ</small> #{category}"
+      do_template :blogPages
+    end
+
+    def nil_or_blank?(target)
+      return target == nil || target == ''
+    end
+
+    #Linux only
+    def send_mail(body)
+      title = 'Contact from Sinji\'s view'
+      to = 'contact@sinjis-view.mydns.jp'
+      system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
+    end
+
+    def create_form_buttons()
+      buttons = Array.new
+      buttons << {:type  => 'submit',
+                  :value => 'post',
+                  :class => 'btn btn-primary',
+                  :target => '',
+                  :onClick => "post_preview(this.form, './post', '')",
+                  :name => 'Post'}
+      buttons << {:type  => 'submit',
+                  :value => 'save',
+                  :class => 'btn btn-default',
+                  :target => '',
+                  :onClick => "grand_parent(this).action = './post'",
+                  :name => 'Save'}
+      buttons << {:type  => 'submit',
+                  :value => 'preview',
+                  :class => 'btn btn-default',
+                  :target => '_blank',
+                  :onClick => "post_preview(this.form, './preview', '_blank')",
+                  :name => 'Preview'}
+      buttons << {:type  => 'submit',
+                  :value => 'delete',
+                  :submit => 'delete',
+                  :class => 'btn btn-danger',
+                  :target => '',
+                  :onClick => "post_preview(this.form, './delete', '')",
+                  :style => 'float: right;',
+                  :name => 'Delete'}
+      return buttons
+    end
+  end
+
+  before do
+    @year          = Time.now.year
+    @since         = @setting["since"]
+    @copyright     = @setting["copyright"]
+    @blog_title    = @setting["blog title"]
+    @sub_title     = @setting["sub title"]
+    @newerEntry    = Entry.order("id desc").limit(5)
+    @category      = Category.order(number: :asc)
+    @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
+  end
+
+  get '/' do
+    @page_title = 'Blog - Sinji\'s View'
+    show_page 1
+  end
+
+  get '/page/:page/' do |p|
+    @page_title  = 'Blog - Sinji\'s View'
+    pagination   = p.to_i
+
+    redirect to '/' if pagination < 2
+
+    show_page pagination
+  end
+
+  get '/entry/:id/' do |i|
+    id = i.to_i
+    redirect to '/' if id <= 0
+
+    begin
+      @status = params[:status]
+      @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
+      @commentNum = @comment.size
+
+      @entry, @pre_active = Entry.find(id).format(false)
+      @page_title = @entry.title + ' - Sinji\'s View'
+
+      do_template :blog_entry
+    rescue
+      raise Sinatra::NotFound
+    end
+  end
+
+  post '/entry/:id/send-comment' do |i|
+    id   = i.to_i
+    name = params[:name]
+    body = params[:body]
+    allow = 0
+    allow = 1 if @setting["comment approval"]
+    if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
+      Comment.create(:entry_id => id, :name => name, :body => body, :allow => allow)
+      redirect to ("/entry/#{id}/?status=success") unless @theme["use Ajax"]
     else
-      haml :not_found
+      redirect to ("/entry/#{id}/?status=error") unless @theme["use Ajax"]
     end
   end
 
-=begin
-  def create_tab()
-    tabs = Array.new
-    tabs << Tabs.new('Home', nil, to('/'))
-    tabs << Tabs.new('Blog', nil, to('/blog/'))
-    products = Tabs.new('Products', 'dropdown', to('/products/'))
-    products.dropdown << Tabs.new('Coming soon!', nil, nil)
-    tabs << products
-    tabs << Tabs.new('Contact', nil, to('/contact/'))
-    return tabs
+  get '/category/:category/' do |category|
+    @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
+    show_category_page(category, 1)
   end
-=end
 
-  def create_tab()
-    formated_tabs = Array.new
-    tabs = Tab.where(nil)
-    tabs.each do |tab|
-      if tab.parent_id == nil then
-        formated_tabs << tab.format()
-      else
-        parent_tab = formated_tabs.find_from_field("@id", tab.parent_id)
-        parent_tab.css_class = "dropdown"
-        parent_tab.dropdown << tab.format()
-      end
+  get '/category/:category/:pagination/' do |category, p|
+    @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
+    pagination = p.to_i
+
+    redirect to "/category/#{category}" if pagination < 2
+
+    show_category_page(category, pagination)
+  end
+
+  get '/contact/' do
+    @status = params[:status]
+    @page_title = 'Contact - Sinji\'s View'
+    do_template :contact
+  end
+
+  post '/contact/send-mail' do
+    begin
+      name    = escape_html(params[:name])
+      address = escape_html(params[:address])
+      body    = escape_html(params[:body])
+      send_mail("#{name}\n#{address}\n\n#{body}")
+      redirect to ('/contact/?status=success') unless @theme["use Ajax"]
+    rescue
+      redirect to ('/contact/?status=error') unless @theme["use Ajax"]
     end
   end
 
-  def nil_or_blank?(target)
-    return target == nil || target == ''
+  #Sign in
+  get "/sign_in" do
+    redirect to '/console/'  if session[:user_id]
+
+    @sidebar = :hidden
+    console_haml :sign_in
   end
 
-  #Linux only
-  def send_mail(body)
-    title = 'Contact from Sinji\'s view'
-    to = 'contact@sinjis-view.mydns.jp'
-    system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
-  end
+  post "/sign_in" do
+    redirect to '/console/'  if session[:user_id]
 
-  def set_active_tab(tab_name)
-    @tab.each do |tab|
-      if tab.name == tab_name then
-        if tab.css_class == nil then
-          tab.css_class = 'active'
-        else
-          tab.css_class = "#{tab.css_class} active"
-        end
-        return
-      end
-    end
-  end
-
-  def redirect_from_old(get_param_p)
-    if get_param_p != nil then
-      old_id = [66, 77, 91, 107, 161]
-      entry_id = old_id.index(get_param_p.to_i)
-      print entry_id
-      if entry_id != nil then
-        redirect to "/blog/entry/#{entry_id+1}/"
-      end
-    end
-  end
-
-  def create_form_buttons()
-    buttons = Array.new
-    buttons << {:type  => 'submit',
-                :value => 'post',
-                :class => 'btn btn-primary',
-                :target => '',
-                :onClick => "post_preview(this.form, './post', '')",
-                :name => 'Post'}
-    buttons << {:type  => 'submit',
-                :value => 'save',
-                :class => 'btn btn-default',
-                :target => '',
-                :onClick => "grand_parent(this).action = './post'",
-                :name => 'Save'}
-    buttons << {:type  => 'submit',
-                :value => 'preview',
-                :class => 'btn btn-default',
-                :target => '_blank',
-                :onClick => "post_preview(this.form, './preview', '_blank')",
-                :name => 'Preview'}
-    buttons << {:type  => 'submit',
-                :value => 'delete',
-                :submit => 'delete',
-                :class => 'btn btn-danger',
-                :target => '',
-                :onClick => "post_preview(this.form, './delete', '')",
-                :style => 'float: right;',
-                :name => 'Delete'}
-    return buttons
-  end
-end
-
-before do
-  @year = Time.now.year
-  @tab = create_tab()
-end
-
-before %r{(^/blog/|/preview$)} do
-  @sidebar = 'active'
-  @blog_active = 'active'
-  @newerEntry = Entry.order("id desc").limit(5)
-  @category = Category.all
-  @newerComment = Comment.order("id desc").where(:allow => 1).limit(5)
-  set_active_tab('Blog')
-end
-
-before %r{^/console/} do
-=begin
-  @tab << Tabs.new('Console', nil, to('/console/'))
-  @tab.last.style = 'float:right;'
-  set_active_tab('Console')
-=end
-end
-
-get '/' do
-  @page_title = 'Sinji\'s View 酒田　シンジの目線'
-  set_active_tab('Home')
-  @element = Element.all
-  haml :about_me
-end
-
-get '/blog/' do
-  @page_title = 'Blog - Sinji\'s View'
-  redirect_from_old(params[:p])
-  show_page 1
-end
-
-get '/blog/page/:page/' do |p|
-  @page_title = 'Blog - Sinji\'s View'
-  pagination = p.to_i
-  if pagination < 2 then
-    redirect to '/blog/'
-  end
-  show_page pagination
-end
-
-get '/blog/entry/:id/' do |i|
-  id = i.to_i
-  if id <= 0 then
-    redirect to '/blog/'
-  end
-  begin
-    @entry = Entry.find(id).format_entry(false)
-    @commentNum = 0
-    @comment = format_comments(Comment.where(:entry_id => id, :allow => 1))
-    @page_title = @entry.title + ' - Sinji\'s View'
-    haml :blog_entry
-  rescue ActiveRecord::RecordNotFound
-    haml :not_found
-  end
-end
-
-post '/blog/entry/:id/send-comment' do |i|
-  id = i.to_i
-  if Entry.find(id) != nil then
-    if ! nil_or_blank?(params[:name]) then
-      if ! nil_or_blank?(params[:body]) then
-        comment = Comment.new
-        comment.entry_id = id
-        comment.name = params[:name]
-        comment.body = params[:body]
-        comment.save
-      end
-    end
-  end
-end
-
-get '/blog/category/:category/' do |category|
-  @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
-  show_category_page(category, 1)
-end
-
-get '/blog/category/:category/:pagination/' do |category, p|
-  @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
-  pagination = p.to_i
-  if pagination < 2 then
-    redirect to '/blog/'
-  end
-  show_category_page(category, pagination)
-end
-
-get '/contact/' do
-  @page_title = 'Contact - Sinji\'s View'
-  set_active_tab('Contact')
-  haml :contact
-end
-
-post '/contact/send-mail' do
-  name    = escape_html(params[:name])
-  address = escape_html(params[:address])
-  body    = escape_html(params[:body])
-  send_mail("#{name}\n#{address}\n\n#{body}")
-end
-
-# console
-get '/console/aboutme/' do
-  @element = Element.all
-  @list_title = 'Element List'
-  @add_button = 'Add Element'
-  haml :element_list
-end
-
-get '/console/aboutme/:id/' do |id|
-  key = id.to_i
-  if key > 0 then
-    element = Element.find(key)
-    @title = element.title
-    @body = element.body
-  elsif id != 'new' then
-    redirect to '/console/aboutme/'
-  end
-  haml :edit
-end
-
-post '/console/aboutme/:id/post' do |id|
-  key = id.to_i
-  if key > 0 then
-    element = Element.find(key)
-  elsif id == 'new' then
-    element = Element.new
-  else
-    redirect to '/console/aboutme/'
-  end
-  if params[:submit] == 'delete' then
-    element.destroy
-    redirect to '/console/aboutme/'
-  end
-  element.title = params[:title]
-  element.body  = params[:entry]
-  element.save
-  redirect to '/console/aboutme/'
-end
-
-get '/console/blog/' do
-  @wait_comment_num = Comment.where(:allow => 0).count
-  haml :blog_console
-end
-
-get '/console/blog/entry/' do
-  @element = Entry.order("id desc").all
-  @list_title = 'Entry List'
-  @add_button = 'Add Entry'
-  haml :element_list
-end
-
-get '/console/blog/entry/:id/' do |id|
-  key = id.to_i
-  if key > 0 then
-    entry = Entry.find(key)
-    @title = entry.title
-    @body = entry.body
-    @entryCategory = entry.category.split(",")
-  elsif id == 'new' then
-    @entryCategory = Array.new
-  else
-    redirect to '/console/blog/'
-  end
-  @entryEdit = 'active'
-  @category = Category.all
-  haml :edit
-end
-
-post '/console/blog/entry/:id/post' do |id|
-  key = id.to_i
-  if key > 0 then
-    entry = Entry.find(key)
-  elsif id == 'new' then
-    entry = Entry.new
-  else
-    redirect to '/console/blog/entry/'
-  end
-  entry.title = params[:title]
-  entry.body  = params[:entry]
-  entry.category = ''
-  if params[:category] != nil then
-    params[:category].each do |c|
-      searcher = Searcher.new
-      searcher.entry_id = entry.id
-      searcher.category_id = c
-      searcher.save
-    end
-    entry.category = params[:category].join(", ")
-  end
-  entry.save
-  redirect to '/console/blog/entry/'
-end
-
-post '/console/blog/entry/:id/delete' do |id|
-  key = id.to_i
-  if key > 0 then
-    entry = Entry.find(key)
-  elsif id == 'new' then
-    entry = Entry.new
-  else
-    redirect to '/console/blog/entry/'
-  end
-  Comment.where(:entry_id => entry.id).each do |comment|
-    comment.destroy
-  end
-  entry.destroy
-  redirect to '/console/blog/entry/'
-end
-
-post '/console/blog/entry/:id/preview' do |id|
-  entry = Entry.new
-  entry.title = params[:title]
-  entry.body  = params[:entry]
-  entry.category = ""
-  if params[:category] != nil then
-    params[:category].each do |c|
-      entry.category = "#{entry.category}#{c},"
-    end
-  end
-  entry.created_at = Time.now
-  @entry = entry.format_entry(false)
-  @comment = Array.new
-  haml :blog_entry
-end
-
-get '/console/blog/category/' do
-  @category = Category.all
-  haml :category_edit
-end
-
-post '/console/blog/category/save' do
-  @category = Category.all
-  i = 0
-  @category.each do |c|
-    if params[:category][i] == '' then
-      c.destroy
+    user = User.authenticate(params[:id], params[:password])
+    if user
+      session[:user_id] = user.id
+      redirect to '/console/'
     else
-      c.name = params[:category][i]
-      c.save
+      redirect to "/sign_in?status=error"
     end
-    i = i+1
   end
-  redirect to '/console/blog/category/'
-end
 
-post '/console/blog/category/new' do
-  category = Category.new
-  category.name = params[:category]
-  category.save
-  redirect to '/console/blog/category/'
-end
+  get "/sign_out" do
+    session[:user_id] = nil
+    redirect to "/sign_in"
+  end
 
-get '/console/blog/comment/' do
-  @comment = Comment.all
-  haml :console_comment
-end
 
-get '/console/blog/comment/allow' do
-  id = params[:id].to_i
-  begin
-    comment = Comment.find(id)
-    entry = Entry.find(comment.entry_id)
-    comment.allow = 1
-    comment.save
-    entry.comment_num += 1
+  # console
+  before /^\/console\// do
+    unless session[:user_id]
+      redirect to "/sign_in"
+    end
+    @user = User.find(session[:user_id])
+    @wait_comment_num = Comment.where(:allow => 0).count
+  end
+
+  #home
+  get '/console/' do
+    console_haml :blog_console
+  end
+
+  post "/console/upload" do
+    File.open('public/uploads/' + params[:file][:filename], "w") do |f|
+      f.write(params[:file][:tempfile].read)
+    end
+    return "Complete upload to <strong>/uploads/" + params[:file][:filename] + "</strong>"
+  end
+
+
+  #settings
+  get '/console/settings/' do
+    console_haml :setting
+  end
+
+  post "/console/settings/save" do
+    ary = [ params[:item], params[:value] ].transpose
+    @setting = Hash[*ary.flatten]
+
+    bloggem.set_theme!(@setting['theme'])
+  end
+
+  post '/console/settings/new' do
+    @setting.store(params[:item], params[:value])
+    redirect to '/console/settings/'
+  end
+
+  #entry
+  get '/console/entry/' do
+    @entry = Entry.order("id desc").where(nil)
+    console_haml :element_list
+  end
+
+  get '/console/entry/:id/' do |id|
+    key = id.to_i
+    if key > 0 then
+      entry = Entry.find(key)
+      @title = entry.title
+      @body = entry.body
+      @entryCategory = entry.category.split(",")
+    elsif id == 'new' then
+      @entryCategory = Array.new
+    else
+      redirect to '/console/'
+    end
+    @category = Category.where(nil)
+    console_haml :edit
+  end
+
+  post '/console/entry/:id/post' do |id|
+    key = id.to_i
+    if key > 0 then
+      entry = Entry.find(key)
+    elsif id == 'new' then
+      entry = Entry.new
+    else
+      redirect to '/console/entry/'
+    end
+    entry.title = params[:title]
+    entry.body  = params[:entry]
+    entry.category = ''
+    if params[:category] != nil then
+      params[:category].each do |c|
+        Searcher.create(:entry_id => entry.id, :category_id => c)
+      end
+      entry.category = params[:category].join(", ")
+    end
     entry.save
+    redirect to '/console/entry/'
   end
-end
 
-get '/console/blog/comment/deny' do
-  id = params[:id].to_i
-  begin
-    comment = Comment.find(id)
-    entry = Entry.find(comment.entry_id)
-    comment.allow = 0
-    comment.save
-    if entry.comment_num > 0 then
-      entry.comment_num -= 1
+  post '/console/entry/:id/delete' do |id|
+    if id.to_i > 0 then
+      entry = Entry.find(key)
+      Comment.where(:entry_id => entry.id).each do |comment|
+        comment.destroy
+      end
+      entry.destroy
+    end
+    redirect to '/console/entry/'
+  end
+
+  post '/console/entry/:id/preview' do |id|
+    entry = Entry.new
+    entry.title = params[:title]
+    entry.body  = params[:entry]
+    entry.category = params[:category].join(",")
+    entry.created_at = Time.now
+    @entry, @pre_active = entry.format(false)
+    @comment = Array.new
+    do_template :blog_entry
+  end
+
+  #categoty
+  get '/console/category/' do
+    @category = Category.order(number: :asc)
+    console_haml :category_edit
+  end
+
+  post '/console/category/save' do
+    @category = Category.where(nil)
+    params[:category].size.times do |number|
+      category = Category.find(params[:id].shift.to_i)
+      edited = params[:category].shift
+      if edited == "" then
+        category.destroy
+      else
+        category.name = edited
+        category.number = number
+        category.save
+      end
+    end
+    redirect to '/console/category/'
+  end
+
+  post '/console/category/new' do
+    number = Category.count()
+    category = Category.create(:name => params[:category], :number => number)
+    redirect to '/console/category/'
+  end
+
+  #comment
+  get '/console/comment/' do
+    @comment = Comment.order("id desc")
+    console_haml :console_comment
+  end
+
+  get '/console/comment/allow' do
+    begin
+      comment = Comment.find(params[:id].to_i)
+      entry = Entry.find(comment.entry_id)
+      comment.allow = 1
+      comment.save
+      entry.comment_num += 1
       entry.save
     end
   end
+
+  get '/console/comment/deny' do
+    begin
+      comment = Comment.find(params[:id].to_i)
+      entry = Entry.find(comment.entry_id)
+      comment.allow = 0
+      comment.save
+      if entry.comment_num > 0 then
+        entry.comment_num -= 1
+        entry.save
+      end
+    end
+  end
+
+  get '/console/comment/delete' do
+    begin
+      comment = Comment.find(params[:id].to_i)
+      comment.destroy
+    end
+  end
+
+  get "/console/membars/" do
+    @membars = User.where(nil)
+    console_haml :membars
+  end
+
+  post "/console/membars/add" do
+    if params[:password] != params[:confirm_password]
+      redirect to "/console/membars/?status=password"
+    end
+
+    user = User.new(:id => params[:id], :name => params[:name])
+    user.encrypt_password(params[:password])
+    if user.save
+      redirect to "/console/membars/?status=success"
+    else
+      redirect to "/console/membars/?status=error"
+    end
+  end
+
+  post "/console/membars/leave" do
+    redirect to "/console/membars/" if params[:id] == session[:use_id]
+
+    begin
+      User.find(params[:id]).destroy
+    end
+    redirect to "/console/membars/?status=leave"
+  end
+end
+
+
+class Entry < ActiveRecord::Base
+  def date()
+    fdate = DateTime.parse("#{created_at}")
+    return fdate.strftime("%Y/%m/%d %H:%M")
+  end
+
+  def format(split_body=true)
+    formated = FormatedEntry.new
+    use_pre = false
+
+    formated.id = id
+
+    formated.title = title
+
+    if split_body == true then
+      _body = body.split('[read_more]')
+      formated.body = "#{_body[0]}".gsub(/(\r\n|\r|\n)/, '<br />')
+      formated.read_more = _body.size >= 2
+    else
+      enter = /(\r\n|\r|\n)/
+      formated.body = body.gsub('[read_more]', '').gsub(enter, '<br />')
+    end
+
+    #escape html inside the pre tag
+    pre_pattarn = /<pre(?:.|\n)*?pre>/
+    body_without_pre = formated.body.split(pre_pattarn, -1)
+    pre_tag = formated.body.scan(pre_pattarn)
+    use_pre = true if pre_tag.size > 0
+    formated.body = body_without_pre.shift
+    body_without_pre.length.times do
+      pre = pre_tag.shift
+      pre.gsub!("<br />", "\n")
+      inside_tag = pre[/>(?:.|\n)+</]
+      if inside_tag == nil then
+        inside_tag = ""
+      end
+      inside_tag = inside_tag[1, inside_tag.length - 2]
+      pre.gsub!(/>(?:.|\n)+</, ">#{Rack::Utils.escape_html(inside_tag)}<")
+      formated.body = formated.body + pre + body_without_pre.shift
+    end
+
+    _category_num = category.split(',')
+    _category_num.each do |c|
+      begin
+        _category =  Category.find(c.to_i)
+        formated.category[_category.number] = _category.name
+      end
+    end
+
+    formated.comment_num = comment_num
+
+    formated.created_at = date()
+
+    return [formated, use_pre]
+  end
+end
+
+class Comment < ActiveRecord::Base
+  def date()
+    fdate = DateTime.parse("#{created_at}")
+    return fdate.strftime("%Y/%m/%d %H:%M")
+  end
+
+  def format()
+    formated = FormatedComment.new(
+      id,
+      entry_id,
+      Rack::Utils.escape_html(name),
+      Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />'),
+      date()
+      )
+    return formated
+  end
+end
+
+class Category < ActiveRecord::Base
+end
+
+class Searcher < ActiveRecord::Base
+end
+
+class User < ActiveRecord::Base
+  attr_readonly :password_hash, :password_salt
+
+  def encrypt_password(password)
+    if password.present?
+      self.password_salt = BCrypt::Engine.generate_salt
+      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
+    end
+  end
+
+  def self.authenticate(user_id, password)
+    user = User.find(user_id)
+    if user && user.password_hash == BCrypt::Engine.hash_secret(password, user.password_salt)
+      user
+    else
+      nil
+    end
+  end
+end
+
+class FormatedEntry
+  def initialize()
+    @id
+    @title
+    @body
+    @read_more = false
+    @category = Array.new
+    @comment_num
+    @created_at
+  end
+  attr_accessor(
+    :id,
+    :title,
+    :body,
+    :read_more,
+    :category,
+    :comment_num,
+    :created_at
+    )
+end
+
+class FormatedComment
+  def initialize(id, entry_id, name, body, created_at)
+    @id = id
+    @entry_id = entry_id
+    @name = name
+    @body = body
+    @created_at = created_at
+  end
+  attr_accessor :id, :entry_id, :name, :body, :created_at
 end
