@@ -5,6 +5,8 @@ require 'haml'
 require 'json'
 require 'bcrypt'
 require "sqlite3"
+require 'sinatra/reloader'
+register Sinatra::Reloader
 
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
@@ -130,14 +132,17 @@ class BlogGem < Sinatra::Base
     end
 
     def show_page(pagination)
-      entries = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
-      if entries.size > 0 then
-        set_prev_and_next_link!(entries, pagination, "/page/")
-        @entry = format_elements(entries)
-        do_template :blogPages
-      else
-        raise Sinatra::NotFound
+      @entry = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
+      raise Sinatra::NotFound if @entry.size == 0
+
+      set_prev_and_next_link!(@entry, pagination, "/page/")
+      @pre_active = false
+      @entry.each do |entry|
+        @pre_active = @pre_active || entry.include_pre?
+        p entry.include_pre?
       end
+
+      do_template :blogPages
     end
 
     def show_category_page(category, pagination)
@@ -153,9 +158,9 @@ class BlogGem < Sinatra::Base
 
       @entry = Array.new
       searcher.each do |s|
-        e, pre = Entry.find(s.entry_id).format()
-        @entry << e
-        @pre_active = @pre_active || pre
+        #e, pre = Entry.find(s.entry_id).format()
+        @entry << Entry.find(s.entry_id)
+        @pre_active ||= @entry.last.include_pre?
       end
 
       @head_title = "<small>カテゴリ</small> #{category}"
@@ -239,8 +244,11 @@ class BlogGem < Sinatra::Base
       @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
       @commentNum = @comment.size
 
-      @entry, @pre_active = Entry.find(id).format(false)
-      @page_title = @entry.title + ' - Sinji\'s View'
+      #@entry, @pre_active = Entry.find(id).format(false)
+      @entry = Entry.find(id)
+      @entry.text(false)
+      @pre_active = @entry.include_pre?
+      @page_title = "#{@entry.title} - #{@setting["blog title"]}"
 
       do_template :blog_entry
     rescue
@@ -521,59 +529,65 @@ end
 
 
 class Entry < ActiveRecord::Base
+  def categories()
+    return @categories if @categories
+
+    @categories = Array.new
+    category.split(',').each do |c|
+      begin
+        _category =  Category.find(c.to_i)
+        @categories[_category.number] = _category.name
+      end
+    end
+    return @categories
+  end
+
   def date()
     fdate = DateTime.parse("#{created_at}")
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
 
-  def format(split_body=true)
-    formated = FormatedEntry.new
-    use_pre = false
+  def include_pre?()
+    text() unless @text
+    return @text =~ /<pre(?:.|\n)*?pre>/
+  end
 
-    formated.id = id
+  def read_more()
+    return @read_more
+  end
 
-    formated.title = title
+  def text(split_readmore=true)
+    return @text if @text
 
-    if split_body == true then
-      _body = body.split('[read_more]')
-      formated.body = "#{_body[0]}".gsub(/(\r\n|\r|\n)/, '<br />')
-      formated.read_more = _body.size >= 2
+    #read more
+    @read_more = split_readmore && body.include?("[read_more]")
+
+    if split_readmore then
+      delete_pattarn = /\[read_more\].*$/
     else
-      enter = /(\r\n|\r|\n)/
-      formated.body = body.gsub('[read_more]', '').gsub(enter, '<br />')
+      delete_pattarn = /\[read_more\]/
     end
+    @text = body.gsub(/(\r\n|\r|\n)/,"<br />").gsub(delete_pattarn, "")
 
     #escape html inside the pre tag
     pre_pattarn = /<pre(?:.|\n)*?pre>/
-    body_without_pre = formated.body.split(pre_pattarn, -1)
-    pre_tag = formated.body.scan(pre_pattarn)
-    use_pre = true if pre_tag.size > 0
-    formated.body = body_without_pre.shift
-    body_without_pre.length.times do
-      pre = pre_tag.shift
-      pre.gsub!("<br />", "\n")
-      inside_tag = pre[/>(?:.|\n)+</]
-      if inside_tag == nil then
-        inside_tag = ""
-      end
+
+    texts_without_pre = @text.split(pre_pattarn, -1)
+    pre_tags = @text.scan(pre_pattarn)
+
+    @text = texts_without_pre.shift
+    texts_without_pre.length.times do
+      pre_tag = pre_tags.shift
+      pre_tag.gsub!("<br />", "\n")
+
+      inside_tag = pre_tag[/>(?:.|\n)+</] || ""
       inside_tag = inside_tag[1, inside_tag.length - 2]
-      pre.gsub!(/>(?:.|\n)+</, ">#{Rack::Utils.escape_html(inside_tag)}<")
-      formated.body = formated.body + pre + body_without_pre.shift
+
+      pre_tag.gsub!(/>(?:.|\n)+</, ">#{Rack::Utils.escape_html(inside_tag)}<")
+      @text = @text + pre_tag + texts_without_pre.shift
     end
 
-    _category_num = category.split(',')
-    _category_num.each do |c|
-      begin
-        _category =  Category.find(c.to_i)
-        formated.category[_category.number] = _category.name
-      end
-    end
-
-    formated.comment_num = comment_num
-
-    formated.created_at = date()
-
-    return [formated, use_pre]
+    return @text
   end
 end
 
@@ -619,27 +633,6 @@ class User < ActiveRecord::Base
       nil
     end
   end
-end
-
-class FormatedEntry
-  def initialize()
-    @id
-    @title
-    @body
-    @read_more = false
-    @category = Array.new
-    @comment_num
-    @created_at
-  end
-  attr_accessor(
-    :id,
-    :title,
-    :body,
-    :read_more,
-    :category,
-    :comment_num,
-    :created_at
-    )
 end
 
 class FormatedComment
