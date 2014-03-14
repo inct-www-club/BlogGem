@@ -41,7 +41,9 @@ class BlogGem < Sinatra::Base
 
       print "make directories..."
       dirs = ["public", "public/uploads"]
-      dirs.each { |dir| Dir::mkdir(dir) }
+      dirs.each do |dir|
+        Dir::mkdir(dir) unless File.directory?(dir)
+      end
       print "OK\n"
 
       #sign up first user
@@ -56,7 +58,7 @@ class BlogGem < Sinatra::Base
       begin
         print "password?:"
         password = STDIN.noecho(&:gets).chomp
-        print "conform pasword:"
+        print "\nconform pasword:"
       end while password != STDIN.noecho(&:gets).chomp
 
       user = User.new(:id => id, :name => name)
@@ -90,11 +92,7 @@ class BlogGem < Sinatra::Base
 
   helpers do
     def do_template(template, options = {}, locals = {}, &block)
-      #begin
-        public_send(@theme["template"], template, options, locals, &block)
-      #rescue
-      #  raise "template error"
-      #end
+      public_send(@theme["template"], template, options, locals, &block)
     end
 
     def console_haml(template, options = {}, locals = {}, &block)
@@ -567,7 +565,7 @@ class Entry < ActiveRecord::Base
     _category_num.each do |c|
       begin
         _category =  Category.find(c.to_i)
-        formated.category << _category.name
+        formated.category[_category.number] = _category.name
       end
     end
 
