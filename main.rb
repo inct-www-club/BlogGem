@@ -11,11 +11,11 @@ register Sinatra::Reloader
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
     super(app)
-    @setting = BlogGem.load_json("settings.json")
-    theme_path = File.join("views", @setting["theme"])
+    @settings = BlogGem.load_json("settings.json")
+    theme_path = File.join("views", @settings["theme"])
     @theme = BlogGem.load_json( File.join(theme_path, "scheme.json") )
 
-    BlogGem.set_theme!(@setting["theme"])
+    BlogGem.set_theme!(@settings["theme"])
     BlogGem.set_static_dirs!("views/Console")
     BlogGem.enable :sessions
     BlogGem.set :session_secret, "My session secret"
@@ -212,10 +212,10 @@ class BlogGem < Sinatra::Base
 
   before do
     @year          = Time.now.year
-    @since         = @setting["since"]
-    @copyright     = @setting["copyright"]
-    @blog_title    = @setting["blog title"]
-    @sub_title     = @setting["sub title"]
+    @since         = @settings["since"]
+    @copyright     = @settings["copyright"]
+    @blog_title    = @settings["blog title"]
+    @sub_title     = @settings["sub title"]
     @newerEntry    = Entry.order("id desc").limit(5)
     @category      = Category.order(number: :asc)
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
@@ -248,7 +248,7 @@ class BlogGem < Sinatra::Base
       @entry = Entry.find(id)
       @entry.text(false)
       @pre_active = @entry.include_pre?
-      @page_title = "#{@entry.title} - #{@setting["blog title"]}"
+      @page_title = "#{@entry.title} - #{@settings["blog title"]}"
 
       do_template :blog_entry
     rescue
@@ -261,7 +261,7 @@ class BlogGem < Sinatra::Base
     name = params[:name]
     body = params[:body]
     allow = 0
-    allow = 1 if @setting["comment approval"]
+    allow = 1 if @settings["comment approval"]
     if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
       Comment.create(:entry_id => id, :name => name, :body => body, :allow => allow)
       redirect to ("/entry/#{id}/?status=success") unless @theme["use Ajax"]
@@ -357,13 +357,13 @@ class BlogGem < Sinatra::Base
 
   post "/console/settings/save" do
     ary = [ params[:item], params[:value] ].transpose
-    @setting = Hash[*ary.flatten]
+    @settings = Hash[*ary.flatten]
 
-    bloggem.set_theme!(@setting['theme'])
+    bloggem.set_theme!(@settings['theme'])
   end
 
   post '/console/settings/new' do
-    @setting.store(params[:item], params[:value])
+    @settings.store(params[:item], params[:value])
     redirect to '/console/settings/'
   end
 
