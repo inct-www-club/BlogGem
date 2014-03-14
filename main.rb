@@ -102,16 +102,6 @@ class BlogGem < Sinatra::Base
       haml(template, options, locals, &block)
     end
 
-    def format_elements(array)
-      formated = Array.new
-      array.each do |element|
-        f, pre = element.format()
-        @pre_active = @pre_active || pre
-        formated << f
-      end
-      return formated
-    end
-
     def link_to(href, name)
       "<a href='#{href}'>#{name}</a>"
     end
@@ -132,7 +122,7 @@ class BlogGem < Sinatra::Base
     end
 
     def show_page(pagination)
-      @page_title  = @setting["blog title"]
+      @page_title  = @settings["blog title"]
 
       @entry = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
       raise Sinatra::NotFound if @entry.size == 0
@@ -162,7 +152,6 @@ class BlogGem < Sinatra::Base
 
       @entry = Array.new
       searcher.each do |s|
-        #e, pre = Entry.find(s.entry_id).format()
         @entry << Entry.find(s.entry_id)
         @pre_active ||= @entry.last.include_pre?
       end
@@ -243,7 +232,7 @@ class BlogGem < Sinatra::Base
 
     begin
       @status = params[:status]
-      @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
+      @comment = Comment.where(:entry_id => id, :allow => 1)
       @commentNum = @comment.size
 
       @entry = Entry.find(id)
@@ -422,12 +411,13 @@ class BlogGem < Sinatra::Base
   end
 
   post '/console/entry/:id/preview' do |id|
-    entry = Entry.new
-    entry.title = params[:title]
-    entry.body  = params[:entry]
-    entry.category = params[:category].join(",")
-    entry.created_at = Time.now
-    @entry, @pre_active = entry.format(false)
+    @entry = Entry.new
+    @entry.title = params[:title]
+    @entry.body  = params[:entry]
+    category = params[:category] || Array.new
+    @entry.category = category.join(",")
+    @entry.created_at = Time.now
+    @pre_active = @entry.include_pre?
     @comment = Array.new
     do_template :blog_entry
   end
@@ -596,15 +586,12 @@ class Comment < ActiveRecord::Base
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
 
-  def format()
-    formated = FormatedComment.new(
-      id,
-      entry_id,
-      Rack::Utils.escape_html(name),
-      Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />'),
-      date()
-      )
-    return formated
+  def handle()
+    Rack::Utils.escape_html(name)
+  end
+
+  def text()
+    return Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,"<br />")
   end
 end
 
@@ -632,15 +619,4 @@ class User < ActiveRecord::Base
       nil
     end
   end
-end
-
-class FormatedComment
-  def initialize(id, entry_id, name, body, created_at)
-    @id = id
-    @entry_id = entry_id
-    @name = name
-    @body = body
-    @created_at = created_at
-  end
-  attr_accessor :id, :entry_id, :name, :body, :created_at
 end

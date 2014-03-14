@@ -15,11 +15,11 @@
     %h2= 'コメント'
     - @comment.each do |c|
       .panel.panel-default
-        .panel-heading= c.name
+        .panel-heading= c.handle
         .panel-body
-          %p= c.body
+          %p= c.text
           %br
-          = c.created_at
+          = c.date
 .comment-area
   %h2= 'コメントを書く'
   %div

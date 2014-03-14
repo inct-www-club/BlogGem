@@ -6,7 +6,7 @@
 .list-group
   - @newerComment.each do |comment|
     %a.list-group-item{:href => to("/entry/#{comment.entry_id}/")}
-      = comment.name
+      = comment.handle
       %br
       - entry = Entry.find(comment.entry_id)
       %small= entry.title
