@@ -487,32 +487,32 @@ class BlogGem < Sinatra::Base
     end
   end
 
-  get "/console/membars/" do
-    @membars = User.where(nil)
-    console_haml :membars
+  get "/console/members/" do
+    @members = User.where(nil)
+    console_haml :members
   end
 
-  post "/console/membars/add" do
+  post "/console/members/add" do
     if params[:password] != params[:confirm_password]
-      redirect to "/console/membars/?status=password"
+      redirect to "/console/members/?status=password"
     end
 
     user = User.new(:id => params[:id], :name => params[:name])
     user.encrypt_password(params[:password])
     if user.save
-      redirect to "/console/membars/?status=success"
+      redirect to "/console/members/?status=success"
     else
-      redirect to "/console/membars/?status=error"
+      redirect to "/console/members/?status=error"
     end
   end
 
-  post "/console/membars/leave" do
-    redirect to "/console/membars/" if params[:id] == session[:use_id]
+  post "/console/members/leave" do
+    redirect to "/console/members/" if params[:id] == session[:use_id]
 
     begin
       User.find(params[:id]).destroy
     end
-    redirect to "/console/membars/?status=leave"
+    redirect to "/console/members/?status=leave"
   end
 end
 
