@@ -74,6 +74,12 @@ class BlogGem < Sinatra::Base
       end
     end
 
+    def write_json_file(hash, filename)
+      File.open(filename, "w") do |io|
+        JSON.dump(hash, io)
+      end
+    end
+
     def set_theme!(theme)
       theme_path = File.join("views", theme)
       BlogGem.set(:views, theme_path)
@@ -344,15 +350,16 @@ class BlogGem < Sinatra::Base
   end
 
   post "/console/settings/save" do
-    ary = [ params[:item], params[:value] ].transpose
-    @settings = Hash[*ary.flatten]
+    @settings.keys.each do |key|
+      @settings[key] = params[key.to_sym] || @settings[key]
+    end
 
-    bloggem.set_theme!(@settings['theme'])
-  end
+    @settings["comment approval"] = params["comment approval".to_sym]
+    @settings["since"] = params["since".to_sym].to_i
 
-  post '/console/settings/new' do
-    @settings.store(params[:item], params[:value])
-    redirect to '/console/settings/'
+    #bloggem.set_theme!(@settings['theme'])
+    BlogGem.write_json_file(@settings, "settings.json")
+    redirect to "/console/settings/"
   end
 
   #entry
