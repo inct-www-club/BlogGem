@@ -8,14 +8,14 @@
       - entry = Entry.find(c.entry_id)
       %p<
         %i.glyphicon.glyphicon-user
-        %strong= " #{c.name}"
+        %strong= " #{c.handle}"
         %br>
         %i.glyphicon.glyphicon-time
-        = "&nbsp;#{c.created_at}"
+        = "&nbsp;#{c.date}"
         %br>
         %i.glyphicon.glyphicon-book
         %strong= entry.title
-      %p= c.body
+      %p= c.text
       - denying = "float:right;"
       - if c.allow == 0 then
         - button_class = 'btn btn-warning'

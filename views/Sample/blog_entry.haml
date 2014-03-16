@@ -2,7 +2,7 @@
   .alert.alert-success
     %strong= 'Complete'
     = 'コメントの送信が完了しました。'
-    - unless @setting["comment approval"]
+    - unless @settings["comment approval"]
       = 'コメントは管理者の承認後、公開されます。'
 - if @status == "error" then
   .alert.alert-danger
@@ -15,11 +15,11 @@
     %h2= 'コメント'
     - @comment.each do |c|
       .panel.panel-default
-        .panel-heading= c.name
+        .panel-heading= c.handle
         .panel-body
-          %p= c.body
+          %p= c.text
           %br
-          = c.created_at
+          = c.date
 .comment-area
   %h2= 'コメントを書く'
   %div

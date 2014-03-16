@@ -5,15 +5,17 @@ require 'haml'
 require 'json'
 require 'bcrypt'
 require "sqlite3"
+require 'sinatra/reloader'
+register Sinatra::Reloader
 
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
     super(app)
-    @setting = BlogGem.load_json("settings.json")
-    theme_path = File.join("views", @setting["theme"])
+    @settings = BlogGem.load_json("settings.json")
+    theme_path = File.join("views", @settings["theme"])
     @theme = BlogGem.load_json( File.join(theme_path, "scheme.json") )
 
-    BlogGem.set_theme!(@setting["theme"])
+    BlogGem.set_theme!(@settings["theme"])
     BlogGem.set_static_dirs!("views/Console")
     BlogGem.enable :sessions
     BlogGem.set :session_secret, "My session secret"
@@ -46,6 +48,18 @@ class BlogGem < Sinatra::Base
       end
       print "OK\n"
 
+      #settings
+      settings = Hash.new
+      print "Blog title:"
+      settings["blog title"] = STDIN.gets().chomp
+      print "Blog subtitle:"
+      settings["sub title"] = STDIN.gets().chomp
+      print "Name of Copyright holder:"
+      settings["copyright"] = STDIN.gets().chomp
+      settings["theme"] = "Sample"
+      settings["since"] = Time.now.year
+      BlogGem.write_json_file(settings, "settings.json")
+
       #sign up first user
       ActiveRecord::Base.establish_connection(
         "adapter" => "sqlite3",
@@ -69,6 +83,12 @@ class BlogGem < Sinatra::Base
     def load_json(filename)
       File.open(filename, "r") do |f|
         JSON.load(f)
+      end
+    end
+
+    def write_json_file(object, filename)
+      File.open(filename, "w") do |file|
+        file.write( JSON.pretty_generate(object) )
       end
     end
 
@@ -100,16 +120,6 @@ class BlogGem < Sinatra::Base
       haml(template, options, locals, &block)
     end
 
-    def format_elements(array)
-      formated = Array.new
-      array.each do |element|
-        f, pre = element.format()
-        @pre_active = @pre_active || pre
-        formated << f
-      end
-      return formated
-    end
-
     def link_to(href, name)
       "<a href='#{href}'>#{name}</a>"
     end
@@ -130,17 +140,24 @@ class BlogGem < Sinatra::Base
     end
 
     def show_page(pagination)
-      entries = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
-      if entries.size > 0 then
-        set_prev_and_next_link!(entries, pagination, "/page/")
-        @entry = format_elements(entries)
-        do_template :blogPages
-      else
-        raise Sinatra::NotFound
+      @page_title  = @settings["blog title"]
+
+      @entry = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
+      raise Sinatra::NotFound if @entry.size == 0
+
+      set_prev_and_next_link!(@entry, pagination, "/page/")
+      @pre_active = false
+      @entry.each do |entry|
+        @pre_active = @pre_active || entry.include_pre?
+        p entry.include_pre?
       end
+
+      do_template :blogPages
     end
 
     def show_category_page(category, pagination)
+      @page_title = "Category:#{categoty} - #{@settings["blog title"]}"
+
       category_info = Category.where(:name => category)
       raise Sinatra::NotFound  unless category_info.size == 1
 
@@ -153,9 +170,8 @@ class BlogGem < Sinatra::Base
 
       @entry = Array.new
       searcher.each do |s|
-        e, pre = Entry.find(s.entry_id).format()
-        @entry << e
-        @pre_active = @pre_active || pre
+        @entry << Entry.find(s.entry_id)
+        @pre_active ||= @entry.last.include_pre?
       end
 
       @head_title = "<small>カテゴリ</small> #{category}"
@@ -168,8 +184,8 @@ class BlogGem < Sinatra::Base
 
     #Linux only
     def send_mail(body)
-      title = 'Contact from Sinji\'s view'
-      to = 'contact@sinjis-view.mydns.jp'
+      title = "Contact from #{@settings["blog title"]}"
+      to = @settings["mail"]
       system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
     end
 
@@ -207,22 +223,20 @@ class BlogGem < Sinatra::Base
 
   before do
     @year          = Time.now.year
-    @since         = @setting["since"]
-    @copyright     = @setting["copyright"]
-    @blog_title    = @setting["blog title"]
-    @sub_title     = @setting["sub title"]
+    @since         = @settings["since"]
+    @copyright     = @settings["copyright"]
+    @blog_title    = @settings["blog title"]
+    @sub_title     = @settings["sub title"]
     @newerEntry    = Entry.order("id desc").limit(5)
     @category      = Category.order(number: :asc)
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
   end
 
   get '/' do
-    @page_title = 'Blog - Sinji\'s View'
     show_page 1
   end
 
   get '/page/:page/' do |p|
-    @page_title  = 'Blog - Sinji\'s View'
     pagination   = p.to_i
 
     redirect to '/' if pagination < 2
@@ -236,11 +250,13 @@ class BlogGem < Sinatra::Base
 
     begin
       @status = params[:status]
-      @comment = format_elements(Comment.where(:entry_id => id, :allow => 1))
+      @comment = Comment.where(:entry_id => id, :allow => 1)
       @commentNum = @comment.size
 
-      @entry, @pre_active = Entry.find(id).format(false)
-      @page_title = @entry.title + ' - Sinji\'s View'
+      @entry = Entry.find(id)
+      @entry.text(false)
+      @pre_active = @entry.include_pre?
+      @page_title = "#{@entry.title} - #{@settings["blog title"]}"
 
       do_template :blog_entry
     rescue
@@ -253,7 +269,7 @@ class BlogGem < Sinatra::Base
     name = params[:name]
     body = params[:body]
     allow = 0
-    allow = 1 if @setting["comment approval"]
+    allow = 1 if @settings["comment approval"]
     if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
       Comment.create(:entry_id => id, :name => name, :body => body, :allow => allow)
       redirect to ("/entry/#{id}/?status=success") unless @theme["use Ajax"]
@@ -263,12 +279,10 @@ class BlogGem < Sinatra::Base
   end
 
   get '/category/:category/' do |category|
-    @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
     show_category_page(category, 1)
   end
 
   get '/category/:category/:pagination/' do |category, p|
-    @page_title = 'カテゴリ:' + category + ' - Sinji\'s View'
     pagination = p.to_i
 
     redirect to "/category/#{category}" if pagination < 2
@@ -278,7 +292,7 @@ class BlogGem < Sinatra::Base
 
   get '/contact/' do
     @status = params[:status]
-    @page_title = 'Contact - Sinji\'s View'
+    @page_title = "Contact - #{@settings["blog title"]}"
     do_template :contact
   end
 
@@ -348,15 +362,16 @@ class BlogGem < Sinatra::Base
   end
 
   post "/console/settings/save" do
-    ary = [ params[:item], params[:value] ].transpose
-    @setting = Hash[*ary.flatten]
+    @settings.keys.each do |key|
+      @settings[key] = params[key.to_sym] || @settings[key]
+    end
 
-    bloggem.set_theme!(@setting['theme'])
-  end
+    @settings["comment approval"] = !!params["comment approval".to_sym]
+    @settings["since"] = params["since".to_sym].to_i
 
-  post '/console/settings/new' do
-    @setting.store(params[:item], params[:value])
-    redirect to '/console/settings/'
+    #bloggem.set_theme!(@settings['theme'])
+    BlogGem.write_json_file(@settings, "settings.json")
+    redirect to "/console/settings/?status=success"
   end
 
   #entry
@@ -415,12 +430,13 @@ class BlogGem < Sinatra::Base
   end
 
   post '/console/entry/:id/preview' do |id|
-    entry = Entry.new
-    entry.title = params[:title]
-    entry.body  = params[:entry]
-    entry.category = params[:category].join(",")
-    entry.created_at = Time.now
-    @entry, @pre_active = entry.format(false)
+    @entry = Entry.new
+    @entry.title = params[:title]
+    @entry.body  = params[:entry]
+    category = params[:category] || Array.new
+    @entry.category = category.join(",")
+    @entry.created_at = Time.now
+    @pre_active = @entry.include_pre?
     @comment = Array.new
     do_template :blog_entry
   end
@@ -490,90 +506,96 @@ class BlogGem < Sinatra::Base
     end
   end
 
-  get "/console/membars/" do
-    @membars = User.where(nil)
-    console_haml :membars
+  get "/console/members/" do
+    @members = User.where(nil)
+    console_haml :members
   end
 
-  post "/console/membars/add" do
+  post "/console/members/add" do
     if params[:password] != params[:confirm_password]
-      redirect to "/console/membars/?status=password"
+      redirect to "/console/members/?status=password"
     end
 
     user = User.new(:id => params[:id], :name => params[:name])
     user.encrypt_password(params[:password])
     if user.save
-      redirect to "/console/membars/?status=success"
+      redirect to "/console/members/?status=success"
     else
-      redirect to "/console/membars/?status=error"
+      redirect to "/console/members/?status=error"
     end
   end
 
-  post "/console/membars/leave" do
-    redirect to "/console/membars/" if params[:id] == session[:use_id]
+  post "/console/members/leave" do
+    redirect to "/console/members/" if params[:id] == session[:use_id]
 
     begin
       User.find(params[:id]).destroy
     end
-    redirect to "/console/membars/?status=leave"
+    redirect to "/console/members/?status=leave"
   end
 end
 
 
 class Entry < ActiveRecord::Base
+  def categories()
+    return @categories if @categories
+
+    @categories = Array.new
+    category.split(',').each do |c|
+      begin
+        _category =  Category.find(c.to_i)
+        @categories[_category.number] = _category.name
+      end
+    end
+    return @categories
+  end
+
   def date()
     fdate = DateTime.parse("#{created_at}")
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
 
-  def format(split_body=true)
-    formated = FormatedEntry.new
-    use_pre = false
+  def include_pre?()
+    text() unless @text
+    return @text =~ /<pre(?:.|\n)*?pre>/
+  end
 
-    formated.id = id
+  def read_more()
+    return @read_more
+  end
 
-    formated.title = title
+  def text(split_readmore=true)
+    return @text if @text
 
-    if split_body == true then
-      _body = body.split('[read_more]')
-      formated.body = "#{_body[0]}".gsub(/(\r\n|\r|\n)/, '<br />')
-      formated.read_more = _body.size >= 2
+    #read more
+    @read_more = split_readmore && body.include?("[read_more]")
+
+    if split_readmore then
+      delete_pattarn = /\[read_more\].*$/
     else
-      enter = /(\r\n|\r|\n)/
-      formated.body = body.gsub('[read_more]', '').gsub(enter, '<br />')
+      delete_pattarn = /\[read_more\]/
     end
+    @text = body.gsub(/(\r\n|\r|\n)/,"<br />").gsub(delete_pattarn, "")
 
     #escape html inside the pre tag
     pre_pattarn = /<pre(?:.|\n)*?pre>/
-    body_without_pre = formated.body.split(pre_pattarn, -1)
-    pre_tag = formated.body.scan(pre_pattarn)
-    use_pre = true if pre_tag.size > 0
-    formated.body = body_without_pre.shift
-    body_without_pre.length.times do
-      pre = pre_tag.shift
-      pre.gsub!("<br />", "\n")
-      inside_tag = pre[/>(?:.|\n)+</]
-      if inside_tag == nil then
-        inside_tag = ""
-      end
+
+    texts_without_pre = @text.split(pre_pattarn, -1)
+    pre_tags = @text.scan(pre_pattarn)
+
+    @text = texts_without_pre.shift
+    texts_without_pre.length.times do
+      pre_tag = pre_tags.shift
+      pre_tag.gsub!("<br />", "\n")
+
+      inside_tag = pre_tag[/>(?:.|\n)+</] || ""
       inside_tag = inside_tag[1, inside_tag.length - 2]
-      pre.gsub!(/>(?:.|\n)+</, ">#{Rack::Utils.escape_html(inside_tag)}<")
-      formated.body = formated.body + pre + body_without_pre.shift
+
+      pre_tag.gsub!(/>(?:.|\n)+</, ">#{Rack::Utils.escape_html(inside_tag)}<")
+      @text = @text + pre_tag + texts_without_pre.shift
     end
 
-    _category_num = category.split(',')
-    _category_num.each do |c|
-      begin
-        _category =  Category.find(c.to_i)
-        formated.category[_category.number] = _category.name
-      end
-    end
-
-    formated.comment_num = comment_num
-
-    formated.created_at = date()
-
-    return [formated, use_pre]
+    return @text
   end
 end
 
@@ -583,15 +605,12 @@ class Comment < ActiveRecord::Base
     return fdate.strftime("%Y/%m/%d %H:%M")
   end
 
-  def format()
-    formated = FormatedComment.new(
-      id,
-      entry_id,
-      Rack::Utils.escape_html(name),
-      Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,'<br />'),
-      date()
-      )
-    return formated
+  def handle()
+    Rack::Utils.escape_html(name)
+  end
+
+  def text()
+    return Rack::Utils.escape_html(body).gsub(/(\r\n|\r|\n)/,"<br />")
   end
 end
 
@@ -619,36 +638,4 @@ class User < ActiveRecord::Base
       nil
     end
   end
-end
-
-class FormatedEntry
-  def initialize()
-    @id
-    @title
-    @body
-    @read_more = false
-    @category = Array.new
-    @comment_num
-    @created_at
-  end
-  attr_accessor(
-    :id,
-    :title,
-    :body,
-    :read_more,
-    :category,
-    :comment_num,
-    :created_at
-    )
-end
-
-class FormatedComment
-  def initialize(id, entry_id, name, body, created_at)
-    @id = id
-    @entry_id = entry_id
-    @name = name
-    @body = body
-    @created_at = created_at
-  end
-  attr_accessor :id, :entry_id, :name, :body, :created_at
 end

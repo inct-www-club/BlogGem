@@ -16,7 +16,7 @@
     .alert.alert-success{:id => 'success', :style => 'display:none;'}
       %strong= 'Complete'
       = 'コメントの送信が完了しました。'
-      - unless @setting["comment approval"]
+      - unless @settings["comment approval"]
         = 'コメントは管理者の承認後、公開されます。'
     .alert.alert-danger{:id => 'error', :style => 'display:none;'}
       %strong= 'Error'

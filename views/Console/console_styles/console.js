@@ -55,7 +55,7 @@ function delete_comment(button){
   });
 }
 
-function leave_membar(button){
+function leave_member(button){
   button.blur()
   var target_tr = document.getElementById(button.name)
 

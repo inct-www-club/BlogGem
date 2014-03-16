@@ -1,19 +1,25 @@
-.page-header
-  %h1= 'Settings'
-%form{:role => 'form', :method => 'post', :action => './save'}
-  - @setting.each do |key, value|
-    .form-inline
-      .col-sm-6
-        %input.form-control{:name => 'item[]', :type => 'text', :value => key}
-      .col-sm-6
-        %input.form-control{:name => 'value[]', :type => 'text', :value => value}
-  .form-group
-    %button.btn.btn-default{:type => 'submit', :value => 'save'}= 'Save'
-%form.form-inline{:role => 'form', :method => 'post', :action => './new', :style =>'margin-top:30px;'}
-  %label= 'Add setting'
-  .form-group
-    %input.form-control{:name => 'item', :type => 'text'}
-  .form-group
-    %input.form-control{:name => 'value', :type => 'text'}
-  .form-group
-    %button.btn.btn-default{:type => 'submit', :value => 'add'}= 'Add'
+%strong
+  %i.glyphicon.glyphicon-cog
+  = " Settings"
+%hr
+  - if params[:status] == "success" then
+    .alert.alert-success
+      %strong= 'Complete'
+      = ' Settings are saved.'
+  %form{:role => "form", :method => "post", :action => "./save"}
+    .form-group
+      %label= "Blog Title"
+      %input.form-control{:name => "blog title", :type => "text", :value => @settings["blog title"]}
+    .form-group
+      %label= "Sub Title"
+      %input.form-control{:name => "sub title", :type => "text", :value => @settings["sub title"]}
+    .form-group{:style => "margin-top:40px;"}
+      %label= "Since year"
+      %input.form-control{:name => "since", :type => "text", :value => @settings["since"]}
+    .form-group
+      %label= "Copyright holders"
+      %input.form-control{:name => "copyright", :type => "text", :value => @settings["copyright"]}
+    .form-group{:style => "margin-top:40px;"}
+      %label= "Auto comment approval"
+      %input{:name => "comment approval", :type => "checkbox", :value => "true", :checked => @settings["comment approval"]}
+    %button.btn.btn-primary{:type => "submit", :value => "save"}= "Save"
