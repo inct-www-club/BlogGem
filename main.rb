@@ -74,9 +74,9 @@ class BlogGem < Sinatra::Base
       end
     end
 
-    def write_json_file(hash, filename)
-      File.open(filename, "w") do |io|
-        JSON.dump(hash, io)
+    def write_json_file(object, filename)
+      File.open(filename, "w") do |file|
+        file.write( JSON.pretty_generate(object) )
       end
     end
 
@@ -354,12 +354,12 @@ class BlogGem < Sinatra::Base
       @settings[key] = params[key.to_sym] || @settings[key]
     end
 
-    @settings["comment approval"] = params["comment approval".to_sym]
+    @settings["comment approval"] = !!params["comment approval".to_sym]
     @settings["since"] = params["since".to_sym].to_i
 
     #bloggem.set_theme!(@settings['theme'])
     BlogGem.write_json_file(@settings, "settings.json")
-    redirect to "/console/settings/"
+    redirect to "/console/settings/?status=success"
   end
 
   #entry

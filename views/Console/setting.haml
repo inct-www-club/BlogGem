@@ -2,6 +2,10 @@
   %i.glyphicon.glyphicon-cog
   = " Settings"
 %hr
+  - if params[:status] == "success" then
+    .alert.alert-success
+      %strong= 'Complete'
+      = ' Settings are saved.'
   %form{:role => "form", :method => "post", :action => "./save"}
     .form-group
       %label= "Blog Title"
