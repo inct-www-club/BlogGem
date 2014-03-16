@@ -48,6 +48,18 @@ class BlogGem < Sinatra::Base
       end
       print "OK\n"
 
+      #settings
+      settings = Hash.new
+      print "Blog title:"
+      settings["blog title"] = STDIN.gets().chomp
+      print "Blog subtitle:"
+      settings["sub title"] = STDIN.gets().chomp
+      print "Name of Copyright holder:"
+      settings["copyright"] = STDIN.gets().chomp
+      settings["theme"] = "Sample"
+      settings["since"] = Time.now.year
+      BlogGem.write_json_file(settings, "settings.json")
+
       #sign up first user
       ActiveRecord::Base.establish_connection(
         "adapter" => "sqlite3",
