@@ -37,10 +37,10 @@ Ruby
 ライセンス
 -------
 
-このシステムは[MIT Lisence][MIT]の下で部員その他関係者に公開するものとします。  
+このシステムは[MIT License][MIT]の下で部員その他関係者に公開するものとします。  
   
 ライセンスの下、利用者はソースコードの利用・改変・再配布等を自由にすることができます。  
-詳しくは``MIT Lisence``で検索する、もしくは``LISENCE``ファイルを参照してください。  
+詳しくは``MIT License``で検索する、もしくは``LICENSE``ファイルを参照してください。  
 
 [ruby]: https://www.ruby-lang.org/ja/
 [sinatra]: http://www.sinatrarb.com/intro-jp.html
