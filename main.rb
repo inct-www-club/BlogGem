@@ -145,7 +145,7 @@ class BlogGem < Sinatra::Base
       @entry = Entry.order('id desc').limit(6).offset((pagination - 1) * 5)
       raise Sinatra::NotFound if @entry.size == 0
 
-      set_prev_and_next_link!(@entry, pagination, "/page/")
+      set_prev_and_next_link!(@entry, pagination, "/blog/page/")
       @pre_active = false
       @entry.each do |entry|
         @pre_active = @pre_active || entry.include_pre?
@@ -166,7 +166,7 @@ class BlogGem < Sinatra::Base
       searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
       raise Sinatra::NotFound  unless searcher.size > 0
 
-      set_prev_and_next_link!(searcher, pagination, "/category/#{category}/")
+      set_prev_and_next_link!(searcher, pagination, "/blog/category/#{category}/")
 
       @entry = Array.new
       searcher.each do |s|
@@ -233,18 +233,22 @@ class BlogGem < Sinatra::Base
   end
 
   get '/' do
+    do_template :index
+  end
+
+  get '/blog/' do
     show_page 1
   end
 
-  get '/page/:page/' do |p|
+  get '/blog/page/:page/' do |p|
     pagination   = p.to_i
 
-    redirect to '/' if pagination < 2
+    redirect to '/blog/' if pagination < 2
 
     show_page pagination
   end
 
-  get '/entry/:id/' do |i|
+  get '/blog/entry/:id/' do |i|
     id = i.to_i
     redirect to '/' if id <= 0
 
@@ -264,7 +268,7 @@ class BlogGem < Sinatra::Base
     end
   end
 
-  post '/entry/:id/send-comment' do |i|
+  post '/blog/entry/:id/send-comment' do |i|
     id   = i.to_i
     name = params[:name]
     body = params[:body]
@@ -272,20 +276,20 @@ class BlogGem < Sinatra::Base
     allow = 1 if @settings["comment approval"]
     if Entry.find(id) && ! nil_or_blank?(name) && ! nil_or_blank?(body) then
       Comment.create(:entry_id => id, :name => name, :body => body, :allow => allow)
-      redirect to ("/entry/#{id}/?status=success") unless @theme["use Ajax"]
+      redirect to ("/blog/entry/#{id}/?status=success") unless @theme["use Ajax"]
     else
-      redirect to ("/entry/#{id}/?status=error") unless @theme["use Ajax"]
+      redirect to ("/blog//entry/#{id}/?status=error") unless @theme["use Ajax"]
     end
   end
 
-  get '/category/:category/' do |category|
+  get '/blog/category/:category/' do |category|
     show_category_page(category, 1)
   end
 
-  get '/category/:category/:pagination/' do |category, p|
+  get '/blog/category/:category/:pagination/' do |category, p|
     pagination = p.to_i
 
-    redirect to "/category/#{category}" if pagination < 2
+    redirect to "/blog/category/#{category}" if pagination < 2
 
     show_category_page(category, pagination)
   end
