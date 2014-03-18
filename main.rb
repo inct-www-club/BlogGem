@@ -1,3 +1,5 @@
+#BlogGem sandabu edition
+
 require 'rubygems'
 require 'sinatra'
 require 'active_record'
@@ -600,6 +602,12 @@ class Entry < ActiveRecord::Base
     end
 
     return @text
+  end
+
+  def img_src()
+    body =~ /<img(.*?)>/
+    $1 =~ /src=["'](.*?)["']/
+    return $1
   end
 end
 
