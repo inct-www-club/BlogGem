@@ -1,20 +1,21 @@
 #header{
-	background-image: url("../image/bluesky.png");
+	background-image: url("../image/bluesky-line.png");
 	background-position: top left;
 	height: 200px;
 }
-
+/*
 .page{
 	margin-left: 50px;
 	margin-right: 50px;
 	position: absolute;
 }
+*/
 
 .image img{
 	max-width: 200px;
 	max-height: 150px;
 	margin-left : auto;
-	margin-right : auto; 
+	margin-right : auto;
 	text-align : left;
 }
 
