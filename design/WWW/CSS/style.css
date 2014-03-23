@@ -1,56 +1,62 @@
 #header{
 	background-image: url("../image/bluesky-line.png");
 	background-position: top left;
-	height: 200px;
+	height: 100px;
 }
+
 /*
 .page{
 	margin-left: 50px;
 	margin-right: 50px;
 	position: absolute;
+	text-align : center;
 }
 */
 
 .image img{
-	max-width: 200px;
-	max-height: 150px;
+	max-width: 280px;
+	max-height: 210px;
 	margin-left : auto;
 	margin-right : auto;
 	text-align : left;
 }
 
 .imageFrame{
-	width: 200px;
-	height: 150px;
+	width: 280px;
+	height: 210px;
 	margin-left : auto;
 	text-align : center;
 }
 
 .box{
 	display: inline-block;
-	width: 200px;
-	height: 200px;
+	width: 280px;
+	height: 280px;
 	background-color: #e3d7a3;
-	margin: 5px;
+	margin: 6px;
+	/*border-style: solid;
+	border-width: thin;
+	border-color: #1c59b5;*/
 }
 
 .textbox{
 	background-color: #428bca;
-	width: 200px;
-	height: 50px;
+	width: 280px;
+	height: 70px;
+	padding: 3px;
+	padding-left: 6px;
 }
 
 .title2{
-	font-size: 16px;
+	font-size: 20px;
 	color: #FFFFFF;
 	position: absolute;
-	margin: 3px;
-	width: 190px;
+	width: 270px;
 	overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    /*white-space: nowrap;*/
+    /*text-overflow: ellipsis;
     -moz-text-overflow:ellipsis; /* Firefox */
-    -o-text-overflow: ellipsis; /* Opera */
+    /*-o-text-overflow: ellipsis; /* Opera */
 }
 
 .contain {
