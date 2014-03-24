@@ -2,16 +2,42 @@
 	background-image: url("../image/bluesky-line.png");
 	background-position: top left;
 	height: 100px;
+	margin-bottom: 0px;
 }
 
-/*
-.page{
-	margin-left: 50px;
-	margin-right: 50px;
-	position: absolute;
-	text-align : center;
+.tab {
+    padding-top: 20px;
+    border: 1px solid #5290ed;
+    background-color: #5290ed;
 }
-*/
+
+.tab ul {
+    border-bottom: 0px;
+}
+
+.nav-tabs > li > a {
+    color: white;
+}
+
+.nav-tabs > li > a:hover,
+.nav-tabs > li > a:focus,
+.nav .open > a:hover,
+.nav .open > a:focus {
+    background-color: #91b8f2;
+    border-color: #91b8f2;
+    border-bottom-color: transparent;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,{
+    border-color: #5290ed;
+    border-bottom-color: transparent;
+}
+
+.panel-heading, {
+	background-color: #5290ed;
+	border-color: #5290ed;
+}
 
 .image img{
 	max-width: 280px;
