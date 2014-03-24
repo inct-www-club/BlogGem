@@ -115,3 +115,11 @@
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
 }
+
+.thuimg {
+	overflow: hidden;
+}
+
+.thuimg > img {
+	width: 100%;
+}
