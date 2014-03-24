@@ -1,14 +1,14 @@
 #header{
 	background-image: url("../image/bluesky-line.png");
 	background-position: top left;
-	height: 100px;
-	margin-bottom: 0px;
+	height: 80px;
 }
 
 .tab {
     padding-top: 20px;
     border: 1px solid #5290ed;
     background-color: #5290ed;
+    margin-bottom: 20px;
 }
 
 .tab ul {
@@ -34,9 +34,14 @@
     border-bottom-color: transparent;
 }
 
-.panel-heading, {
+.panel{
+	border-color: #5290ed;
+}
+
+.panel-heading {
 	background-color: #5290ed;
 	border-color: #5290ed;
+	color: #FFFFFF;
 }
 
 .image img{
@@ -63,6 +68,10 @@
 	/*border-style: solid;
 	border-width: thin;
 	border-color: #1c59b5;*/
+}
+
+a:hover .box{
+	opacity:0.6;
 }
 
 .textbox{
