@@ -6,6 +6,11 @@
     %input{:name => 'title', :type => 'text', :class => 'form-control', :placeholder => 'title', :value => "#{@title}"}
   .form-group
     %label
+      %i.glyphicon.glyphicon-picture
+      = '&nbsp;Thumbnail URL'
+    %input{:name => 'thumbnail', :type => 'text', :class => 'form-control', :placeholder => 'thumbnail', :value => "#{@thumbnail}"}
+  .form-group
+    %label
       %i.glyphicon.glyphicon-pencil
       = '&nbsp;Entry'
     %textarea{:name => 'entry', :class => 'form-control', :rows => '20'}= @body

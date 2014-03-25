@@ -392,6 +392,7 @@ class BlogGem < Sinatra::Base
       entry = Entry.find(key)
       @title = entry.title
       @body = entry.body
+      @thumbnail = entry.thumbnail
       @entryCategory = entry.category.split(",")
     elsif id == 'new' then
       @entryCategory = Array.new
@@ -413,6 +414,7 @@ class BlogGem < Sinatra::Base
     end
     entry.title = params[:title]
     entry.body  = params[:entry]
+    entry.thumbnail = params[:thumbnail]
     entry.category = ''
     if params[:category] != nil then
       params[:category].each do |c|
