@@ -4,6 +4,18 @@
 	height: 80px;
 }
 
+#footer{
+	background-color: #5290ed; 
+	background-position: bottom left;
+	height: 40px;
+	color: #FFFFFF;
+	text-align : center;
+}
+
+/*.page-header{
+	background-color: #a5c4f3;
+}*/
+
 .tab {
     padding-top: 20px;
     border: 1px solid #5290ed;
