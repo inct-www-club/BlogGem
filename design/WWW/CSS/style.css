@@ -94,7 +94,7 @@ a:hover .box{
 	padding-left: 6px;
 }
 
-.title2{
+.title{
 	font-size: 20px;
 	color: #FFFFFF;
 	position: absolute;
@@ -104,37 +104,6 @@ a:hover .box{
     /*text-overflow: ellipsis;
     -moz-text-overflow:ellipsis; /* Firefox */
     /*-o-text-overflow: ellipsis; /* Opera */
-}
-
-.contain {
-	display: inline-block;
-	background-color: #FFFFFF;
-	background-position: center center;
-	background-repeat: no-repeat;
-	margin: 5px;
-	width: 200px;
-	height: 200px;
-	background-size: contain;
-	border: solid 2px #d3d3d3;
-	border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-}
-
-.title {
-	font-size: 16px;
-	color: #000000;
-	text-align: center;
-}
-
-.titleback {
-	height: 17px;
-	position: static;
-	background-color: #000000;
-	opacity: 0.8;
-	border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
 }
 
 .thuimg {
