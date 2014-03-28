@@ -7,6 +7,7 @@ body{
   background-image: url("../image/background.png");
   repeat: repeat;
   background-attachment: fixed;
+  font-size: 18px;
 }
 
 #footer{
@@ -43,6 +44,7 @@ body{
 
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:focus {
+  background-color: #eaeeff;
   border-color: #5290ed;
   border-bottom-color: transparent;
 }
