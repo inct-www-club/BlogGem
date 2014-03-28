@@ -3,6 +3,12 @@
   background-position: top left;
 }
 
+body{
+  background-image: url("../image/background.png");
+  repeat: repeat;
+  background-attachment: fixed;
+}
+
 #footer{
   background-color: #5290ed;
   background-position: bottom left;
@@ -49,13 +55,20 @@ img {
   max-width: 100%;
 }
 
+.panel-blue{
+  background-color: #5290ed;
+  border-color: #5290ed;
+  color: #FFFFFF;
+  padding: 10px;
+}
+
 .panel-heading {
   background-color: #5290ed;
   border-color: #5290ed;
   color: #FFFFFF;
 }
 
-.panel-heading .strong {
+.strong {
   color: #fcc66e;
 }
 
