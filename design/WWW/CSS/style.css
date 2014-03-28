@@ -5,7 +5,7 @@
 }
 
 #footer{
-	background-color: #5290ed; 
+	background-color: #5290ed;
 	background-position: bottom left;
 	height: 40px;
 	color: #FFFFFF;
@@ -143,4 +143,8 @@ a:hover .box{
 
 .thuimg > img {
 	width: 100%;
+}
+
+div.indent{
+  padding-left: 40px;
 }
