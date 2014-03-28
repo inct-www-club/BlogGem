@@ -148,3 +148,7 @@ a:hover .box{
 div.indent{
   padding-left: 40px;
 }
+
+i {
+  font-size:16px;
+}
