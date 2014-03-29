@@ -5,5 +5,6 @@ $(window).resize( function(){
 });
 
 function resize_image() {
-    thu.css("height", $("div.thuimg").width() * 0.8);
+    var thu = $('div.thuimg')
+    thu.css('height', thu.width() * 0.8);
 }
