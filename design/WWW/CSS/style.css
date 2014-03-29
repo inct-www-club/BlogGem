@@ -4,7 +4,8 @@
 }
 
 body{
-  background-image: url("../image/background.png");
+  /*background-image: url("../image/background.png");*/
+  background-color: #eaeeff;
   repeat: repeat;
   background-attachment: fixed;
   font-size: 18px;
