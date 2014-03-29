@@ -4,8 +4,8 @@
 }
 
 body{
-  /*background-image: url("../image/background.png");*/
-  background-color: #eaeeff;
+  background-image: url("../image/background/natural_paper.png");
+  /*background-color: #e4e8fb;/*#eaeeff;*/
   repeat: repeat;
   background-attachment: fixed;
   font-size: 18px;
@@ -17,13 +17,14 @@ body{
   height: 40px;
   color: #FFFFFF;
   text-align : center;
+  margin-top: 20px;
 }
 
 .tab {
   padding-top: 20px;
   border: 1px solid #5290ed;
   background-color: #5290ed;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
 .tab ul {
@@ -45,7 +46,7 @@ body{
 
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:focus {
-  background-color: #eaeeff;
+  /*background-color: #e4e8fb;*/
   border-color: #5290ed;
   border-bottom-color: transparent;
 }
@@ -81,41 +82,6 @@ img {
   margin-left : auto;
   margin-right : auto;
   text-align : left;
-}
-
-.imageFrame{
-  width: 280px;
-  height: 210px;
-  margin-left : auto;
-  text-align : center;
-}
-
-.box{
-  display: inline-block;
-  width: 280px;
-  height: 280px;
-  background-color: #e3d7a3;
-  margin: 6px;
-}
-
-a:hover .box{
-  opacity:0.6;
-}
-
-.textbox{
-  background-color: #428bca;
-  width: 280px;
-  height: 70px;
-  padding: 3px;
-  padding-left: 6px;
-}
-
-.title{
-  font-size: 20px;
-  color: #FFFFFF;
-  position: absolute;
-  width: 270px;
-  overflow: hidden;
 }
 
 .thuimg {
