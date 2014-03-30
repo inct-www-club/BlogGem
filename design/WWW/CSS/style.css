@@ -4,7 +4,7 @@
 }
 
 body{
-  background-image: url("../image/background/paper-bg-01a.jpg");
+  background-image: url("../image/background/natural_paper.png");
   /*background-color: #e4e8fb;/*#eaeeff;*/
   repeat: repeat;
   /*background-attachment: fixed;*/
@@ -53,6 +53,9 @@ body{
 
 .panel{
   border-color: #5290ed;
+  -webkit-box-shadow: 0 10px 6px -6px #777;
+     -moz-box-shadow: 0 10px 6px -6px #777;
+          box-shadow: 0 10px 6px -6px #777;
 }
 
 img {
@@ -104,4 +107,10 @@ i {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.thumbnail{
+  -webkit-box-shadow: 0 10px 6px -6px #777;
+     -moz-box-shadow: 0 10px 6px -6px #777;
+          box-shadow: 0 10px 6px -6px #777;
 }
