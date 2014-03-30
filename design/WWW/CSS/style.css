@@ -18,7 +18,7 @@ html {
 
 #footer{
   background-color: #5290ed;
-  height: 40px;
+  min-height: 40px;
   color: #FFFFFF;
   text-align : center;
   margin-top: 20px;
@@ -36,6 +36,7 @@ html {
   border: 1px solid #5290ed;
   background-color: #5290ed;
   margin-bottom: 40px;
+  /*border-bottom: 6px solid #fcc66e;*/
 }
 
 .tab ul {
@@ -57,7 +58,7 @@ html {
 
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:focus {
-  /*background-color: #e4e8fb;*/
+  /*background-color: #fcc66e;*/
   border-color: #5290ed;
   border-bottom-color: transparent;
 }
