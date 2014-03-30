@@ -9,15 +9,26 @@ body{
   repeat: repeat;
   /*background-attachment: fixed;*/
   font-size: 18px;
+  height: 100%;
+}
+
+html {
+  height: 100%;
 }
 
 #footer{
   background-color: #5290ed;
-  background-position: bottom left;
   height: 40px;
   color: #FFFFFF;
   text-align : center;
   margin-top: 20px;
+}
+
+#wrap {
+  min-height: 100%;
+  height: auto;
+  margin: 0 auto -40px;
+  padding: 0 0 40px;
 }
 
 .tab {
