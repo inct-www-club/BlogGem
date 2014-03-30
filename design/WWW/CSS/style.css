@@ -4,10 +4,10 @@
 }
 
 body{
-  background-image: url("../image/background/natural_paper.png");
+  background-image: url("../image/background/paper-bg-01a.jpg");
   /*background-color: #e4e8fb;/*#eaeeff;*/
   repeat: repeat;
-  background-attachment: fixed;
+  /*background-attachment: fixed;*/
   font-size: 18px;
 }
 
