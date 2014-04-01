@@ -314,6 +314,10 @@ class BlogGem < Sinatra::Base
     end
   end
 
+  get '/link/' do
+    do_template :link
+  end
+
   #Sign in
   get "/sign_in" do
     redirect to '/console/'  if session[:user_id]
