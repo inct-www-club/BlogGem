@@ -1,0 +1,20 @@
+.titleImg{
+  max-height: 240px;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.panel table img{
+  max-height: 56px;
+  max-width: 70px;
+  margin: 0px;
+}
+
+.table a{
+  color: #000000;
+  display: block;
+}
+
+.table a:hover{
+  background-color:#eeeeee;
+}

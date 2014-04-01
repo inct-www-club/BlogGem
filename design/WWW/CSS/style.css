@@ -87,6 +87,10 @@ img {
   color: #FFFFFF;
 }
 
+.panel-news{
+  padding: 5px;
+}
+
 .strong {
   color: #fcc66e;
 }
