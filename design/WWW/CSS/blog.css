@@ -1,3 +1,7 @@
+.titleFont{
+  color: #ffffff;
+}
+
 .titleImg{
   max-height: 240px;
   max-width: 300px;
@@ -13,10 +17,4 @@
 
 .newArticle .list-group-item{
   min-height: 75px;
-}
-
-.newCommentTitle{
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
