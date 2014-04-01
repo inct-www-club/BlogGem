@@ -1,0 +1,42 @@
+<div class="panel panel-blue effect1">
+  <h1><span class="strong">連</span>絡フォーム</h1>
+</div><!-- panel -->
+
+<div style="margin-top:20px;">
+  <% if @status == "success" then %>
+    <div class="alert alert-success">
+      <strong>
+        <%= 'Complete' %>
+      </strong>
+      <%= 'メールの送信が完了しました。' %>
+    </div>
+  <% elsif @status == "error" then %>
+    <div class="alert alert-danger">
+      <strong>
+        <%= 'Error' %>
+      </strong>
+      <%= '入力項目を確認してください。' %>
+    </div>
+  <% end %>
+
+  <form action="./send-mail" method="post" ole="form">
+    <div class="form-group">
+      <label>お名前</label>
+      <input class="form-control" name="name" pleceholder="Name" type="text"></input>
+    </div>
+
+    <div class="form-group">
+      <label>メールアドレス</label>
+      <input class="form-control" name="address" pleceholder="Address" type="email"></input>
+    </div>
+
+    <div class="form-group">
+      <label>本文</label>
+      <textarea class="form-control" name="body" rows="15"></textarea>
+    </div>
+
+    <div class="form-group">
+      <button class="btn btn-default" type="submit">Send</button>
+    </div>
+  </form>
+</div>
