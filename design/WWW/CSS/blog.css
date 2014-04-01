@@ -14,3 +14,9 @@
 .newArticle .list-group-item{
   min-height: 75px;
 }
+
+.newCommentTitle{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
