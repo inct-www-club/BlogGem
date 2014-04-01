@@ -228,13 +228,13 @@ class BlogGem < Sinatra::Base
     @since         = @settings["since"]
     @copyright     = @settings["copyright"]
     @blog_title    = @settings["blog title"]
-    @sub_title     = @settings["sub title"]
     @newerEntry    = Entry.order("id desc").limit(5)
     @category      = Category.order(number: :asc)
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
   end
 
   get '/' do
+    @activeHome = 'active'
     do_template :index
   end
 
