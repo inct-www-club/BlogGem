@@ -4,17 +4,9 @@
   margin-bottom: 20px;
 }
 
-.panel table img{
+.panel .list-group img{
   max-height: 56px;
   max-width: 70px;
   margin: 0px;
-}
-
-.table a{
-  color: #000000;
-  display: block;
-}
-
-.table a:hover{
-  background-color:#eeeeee;
+  margin-right: 0.5em;
 }
