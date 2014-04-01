@@ -24,8 +24,8 @@
               %a{:href => to('/contact/')}= '連絡'
             %li{:class => @activeLink}<
               %a{:href => to('/link/')}= 'リンク'
-    .container
-      = yield
+      .container
+        = yield
     #footer
       %p<= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
     %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.min.js'}
