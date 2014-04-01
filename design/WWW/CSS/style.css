@@ -107,6 +107,10 @@ img {
   width: 100%;
 }
 
+a:hover .thuimg{
+  opacity:0.7;
+}
+
 div.indent{
   padding-left: 40px;
 }
