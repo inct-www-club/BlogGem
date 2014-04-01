@@ -10,3 +10,7 @@
   margin: 0px;
   margin-right: 0.5em;
 }
+
+.newArticle .list-group-item{
+  min-height: 75px;
+}
