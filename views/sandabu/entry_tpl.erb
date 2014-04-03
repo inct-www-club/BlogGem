@@ -1,0 +1,22 @@
+<div class="panel">
+  <div class="panel-heading">
+    <a class="titleFont" href="<%= to("/entry/#{@e.id}/") %>"><h2><%= @e.title %></h2></a>
+    <%= @e.date %>
+  </div>
+
+  <div class="panel-body">
+    <p><img src="<%= to(@e.thumbnail) %>" /></p>
+    <p><%= @e.text %></p>
+    <% if @e.read_more then %>
+    <a hrefhref="<%= to("/entry/#{@e.id}/") %>"><button class='btn btn-primary'>続きを読む</button></a>
+    <% end %>
+  </div>
+
+  <div class="panel-footer">
+    カテゴリー:
+    <% @e.categories.each do |category| %>
+    <a href"<%= to("/category/#{category}/") %>">&nbsp;<%= category %>,</a><br />
+    コメント<span class='badge'><%= @e.comment_num %></span>
+    <% end %>
+  </div>
+</div><!-- panel -->

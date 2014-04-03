@@ -1,0 +1,19 @@
+<div class="col-sm-9">
+  <% if @head_title then %>
+  <div class="page-header">
+    <h1><%= @head_title %></h1>
+  </div>
+  <% end %>
+  <% @entry.each do |e| %>
+  <% @e = e %>
+  <%= erb :entry_tpl %>
+  <% end %>
+  <ul class="pager">
+    <li class="previous <%= @previousClass %>"><a href="<%= @previousLink %>">&larr; 前のページ</a>
+    <li class="next <%= @nextClass %>"><a href="<%= @pnextLink %>">次のページ &rarr;</a>
+  </ul>
+</div><!-- col-sm-9 -->
+
+<div class="col-sm-3">
+<%= erb :blog_sidebar %>
+</div>

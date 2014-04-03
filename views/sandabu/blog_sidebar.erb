@@ -1,0 +1,29 @@
+<div class="panel">
+  <div class="panel-heading"><h4>最新記事</h4></div>
+  <div class="list-group newArticle">
+    <% @newerEntry.each do |entry| %>
+    <a class="list-group-item" href="<%= to("/entry/#{entry.id}/") %>">
+      <img class="pull-left" src="<%= to(entry.thumbnail) %>" alt="thumbnail" />
+      <p><%= entry.title %></p>
+    </a>
+    <% end %>
+  </div><!-- list-group -->
+</div><!-- panel -->
+
+<div class="panel">
+  <div class="panel-heading"><h4>最新コメント</h4></div>
+  <div class="list-group">
+    <% @newerComment.each do |comment| %>
+    <a class="list-group-item" href="<%= to("/entry/#{comment.entry_id}/") %>"><%= "#{Entry.find(comment.entry_id).title}[#{comment.date} #{comment.handle}]" %></a>
+    <% end %>
+  </div>
+</div><!-- panel -->
+
+<div class="panel">
+  <div class="panel-heading"><h4>カテゴリー</h4></div>
+  <div class="list-group">
+    <% @category.each do |c| %>
+    <a class="list-group-item" href="<%= to("/category/#{c.name}/") %>"><%= c.name %></a>
+    <% end %>
+  </div>
+</div><!-- panel -->

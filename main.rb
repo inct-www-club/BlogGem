@@ -233,6 +233,10 @@ class BlogGem < Sinatra::Base
     @newerComment  = Comment.order("id desc").where(:allow => 1).limit(5)
   end
 
+  before /^\/blog\// do
+    @activeBlog = 'active'
+  end
+
   get '/' do
     @activeHome = 'active'
     do_template :index
