@@ -1,0 +1,38 @@
+<div class="col-sm-9">
+  <% @e = @entry%>
+  <%= erb :entry_tpl %>
+
+  <% @comment.each do |c| %>
+  <div class="panel panel-info">
+    <div class="panel-heading"><%= c.handle %> <%= c.date %></div>
+    <div class="panel-body">
+      <%= c.text %>
+    </div>
+  </div><!-- panel -->
+  <% end %>
+
+  <div class="panel">
+    <div class="panel-heading">
+      <a class="titleFont" href="#">この記事にコメントする</a>
+    </div>
+    <div class="panel-body">
+      <form action="./send-comment" method="post" role="form">
+        <div class="form-group">
+          <label>名前</label>
+          <input class='form-control' name='name' pleceholder='Your name' type='text'>
+        </div>
+        <div class="form-group">
+          <label>コメント</label>
+          <textarea class='form-control' name='body' rows='10'></textarea>
+        </div>
+        <div class="form-group">
+          <input class="btn btn-primary" type="submit">
+        </div>
+      </form>
+    </div><!-- panel-body -->
+  </div><!-- panel -->
+</div><!-- col-sm-9 -->
+
+<div class="col-sm-3">
+<%= erb :blog_sidebar %>
+</div>

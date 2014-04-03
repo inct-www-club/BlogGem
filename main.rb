@@ -258,7 +258,7 @@ class BlogGem < Sinatra::Base
     id = i.to_i
     redirect to '/' if id <= 0
 
-    begin
+    #begin
       @status = params[:status]
       @comment = Comment.where(:entry_id => id, :allow => 1)
       @commentNum = @comment.size
@@ -269,9 +269,9 @@ class BlogGem < Sinatra::Base
       @page_title = "#{@entry.title} - #{@settings["blog title"]}"
 
       do_template :blog_entry
-    rescue
-      raise Sinatra::NotFound
-    end
+    #rescue
+      #raise Sinatra::NotFound
+    #end
   end
 
   post '/blog/entry/:id/send-comment' do |i|
