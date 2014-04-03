@@ -16,7 +16,7 @@
     カテゴリー:
     <% @e.categories.each do |category| %>
     <a href"<%= to("/blog/category/#{category}/") %>">&nbsp;<%= category %>,</a><br />
-    コメント<span class='badge'><%= @e.comment_num %></span>
     <% end %>
+    コメント<span class='badge'><%= @e.comment_num %></span>
   </div>
 </div><!-- panel -->
