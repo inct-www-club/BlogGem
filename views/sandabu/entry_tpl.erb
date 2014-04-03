@@ -1,6 +1,6 @@
 <div class="panel">
   <div class="panel-heading">
-    <a class="titleFont" href="<%= to("/entry/#{@e.id}/") %>"><h2><%= @e.title %></h2></a>
+    <a class="titleFont" href="<%= to("/blog/entry/#{@e.id}/") %>"><h2><%= @e.title %></h2></a>
     <%= @e.date %>
   </div>
 
@@ -8,14 +8,14 @@
     <p><img src="<%= to(@e.thumbnail) %>" /></p>
     <p><%= @e.text %></p>
     <% if @e.read_more then %>
-    <a hrefhref="<%= to("/entry/#{@e.id}/") %>"><button class='btn btn-primary'>続きを読む</button></a>
+    <a hrefhref="<%= to("/blog/entry/#{@e.id}/") %>"><button class='btn btn-primary'>続きを読む</button></a>
     <% end %>
   </div>
 
   <div class="panel-footer">
     カテゴリー:
     <% @e.categories.each do |category| %>
-    <a href"<%= to("/category/#{category}/") %>">&nbsp;<%= category %>,</a><br />
+    <a href"<%= to("/blog/category/#{category}/") %>">&nbsp;<%= category %>,</a><br />
     コメント<span class='badge'><%= @e.comment_num %></span>
     <% end %>
   </div>
