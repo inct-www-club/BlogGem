@@ -158,7 +158,7 @@ class BlogGem < Sinatra::Base
     end
 
     def show_category_page(category, pagination)
-      @page_title = "Category:#{categoty} - #{@settings["blog title"]}"
+      @page_title = "Category:#{category} - #{@settings["blog title"]}"
 
       category_info = Category.where(:name => category)
       raise Sinatra::NotFound  unless category_info.size == 1
@@ -420,17 +420,22 @@ class BlogGem < Sinatra::Base
     else
       redirect to '/console/entry/'
     end
-    entry.title = params[:title]
+
     entry.body  = params[:entry]
     entry.thumbnail = params[:thumbnail]
-    entry.category = ''
-    if params[:category] != nil then
+    entry.title = params[:title]
+    begin
+      entry.category = params[:category].join(", ")
+    rescue
+      entry.category = ''
+    end
+    entry.save
+
+    if params[:category] then
       params[:category].each do |c|
         Searcher.create(:entry_id => entry.id, :category_id => c)
       end
-      entry.category = params[:category].join(", ")
     end
-    entry.save
     redirect to '/console/entry/'
   end
 
