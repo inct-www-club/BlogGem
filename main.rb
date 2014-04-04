@@ -575,6 +575,7 @@ class Entry < ActiveRecord::Base
         @categories[_category.number] = _category.name
       end
     end
+    @categories.compact!
     return @categories
   end
 
