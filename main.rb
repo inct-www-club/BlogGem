@@ -6,9 +6,7 @@ require 'active_record'
 require 'haml'
 require 'json'
 require 'bcrypt'
-require "sqlite3"
-require 'sinatra/reloader'
-register Sinatra::Reloader
+require 'sqlite3'
 
 class BlogGem < Sinatra::Base
   def initialize(app = nil)
@@ -301,6 +299,7 @@ class BlogGem < Sinatra::Base
   end
 
   get '/products/' do
+    @activeProducts = 'active'
     targer_category_id = Category.where(:name => '製作物').first.id
     entries_id = Searcher.where(:category_id => targer_category_id)
     @products = Entry.where(:id => entries_id)
@@ -308,6 +307,7 @@ class BlogGem < Sinatra::Base
   end
 
   get '/contact/' do
+    @activeContact = 'active'
     @status = params[:status]
     @page_title = "Contact - #{@settings["blog title"]}"
     do_template :contact
@@ -326,6 +326,7 @@ class BlogGem < Sinatra::Base
   end
 
   get '/link/' do
+    @activeLink = 'active'
     do_template :link
   end
 
@@ -579,9 +580,9 @@ class Entry < ActiveRecord::Base
     return @categories
   end
 
-  def date()
+  def date(format="%Y/%m/%d %H:%M")
     fdate = DateTime.parse("#{created_at}")
-    return fdate.strftime("%Y/%m/%d %H:%M")
+    return fdate.strftime(format)
   end
 
   def include_pre?()
