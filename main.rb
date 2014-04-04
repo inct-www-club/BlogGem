@@ -300,6 +300,13 @@ class BlogGem < Sinatra::Base
     show_category_page(category, pagination)
   end
 
+  get '/products/' do
+    targer_category_id = Category.where(:name => '製作物').first.id
+    entries_id = Searcher.where(:category_id => targer_category_id)
+    @products = Entry.where(:id => entries_id)
+    do_template  :products
+  end
+
   get '/contact/' do
     @status = params[:status]
     @page_title = "Contact - #{@settings["blog title"]}"
