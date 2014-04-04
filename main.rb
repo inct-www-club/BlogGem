@@ -340,7 +340,7 @@ class BlogGem < Sinatra::Base
   post "/sign_in" do
     redirect to '/console/'  if session[:user_id]
 
-    user = User.authenticate(params[:id], params[:password])
+      user = User.authenticate(params[:id], params[:password])
     if user
       session[:user_id] = user.id
       redirect to '/console/'
@@ -665,7 +665,7 @@ class User < ActiveRecord::Base
   end
 
   def self.authenticate(user_id, password)
-    user = User.find(user_id)
+    user = User.find_by_id(user_id)
     if user && user.password_hash == BCrypt::Engine.hash_secret(password, user.password_salt)
       user
     else
