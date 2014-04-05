@@ -110,7 +110,7 @@ class BlogGem < Sinatra::Base
 
   helpers do
     def to(path)
-      super(path).sub('/main.cgi', '')
+      super(path).sub('/index.cgi', '')
     end
 
     def do_template(template, options = {}, locals = {}, &block)
