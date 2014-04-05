@@ -308,6 +308,8 @@ class BlogGem < Sinatra::Base
     begin
       targer_category_id = Category.where(:name => '製作物').first.id
       entries_id = Searcher.where(:category_id => targer_category_id)
+    rescue
+      entries_id = 0
     end
     @products = Entry.where(:id => entries_id)
     do_template  :products
