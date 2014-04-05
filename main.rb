@@ -1,6 +1,3 @@
-#!/home/sandabu/local/bin/ruby
-ENV['GEM_HOME'] = '/home/sandabu/local/lib/ruby/gems'
-
 require 'rubygems'
 require 'sinatra'
 require 'active_record'
@@ -112,6 +109,10 @@ class BlogGem < Sinatra::Base
 
 
   helpers do
+    def to(path)
+      super(path).sub('/main.cgi', '')
+    end
+
     def do_template(template, options = {}, locals = {}, &block)
       public_send(@theme["template"], template, options, locals, &block)
     end
@@ -150,7 +151,6 @@ class BlogGem < Sinatra::Base
       @pre_active = false
       @entry.each do |entry|
         @pre_active = @pre_active || entry.include_pre?
-        p entry.include_pre?
       end
 
       do_template :blogPages
@@ -372,7 +372,7 @@ class BlogGem < Sinatra::Base
   end
 
   post "/console/upload" do
-    File.open('public/uploads/' + params[:file][:filename], "w") do |f|
+    File.open('uploads/' + params[:file][:filename], "w") do |f|
       f.write(params[:file][:tempfile].read)
     end
     return "Complete upload to <strong>/uploads/" + params[:file][:filename] + "</strong>"
@@ -676,8 +676,3 @@ class User < ActiveRecord::Base
     end
   end
 end
-
-builder = Rack::Builder.new do
-  run BlogGem.new
-end
-Rack::Handler::CGI.run(builder)

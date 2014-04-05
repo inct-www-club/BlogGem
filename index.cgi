@@ -2,5 +2,5 @@
 ENV['GEM_HOME'] = '/home/sandabu/local/lib/ruby/gems'
 load './main.rb'
 
-#set :run => false
+set :run => false
 Rack::Handler::CGI.run(BlogGem)
