@@ -134,3 +134,24 @@ i {
      -moz-box-shadow: 0 10px 6px -6px #777;
           box-shadow: 0 10px 6px -6px #777;
 }
+
+.titleFont{
+  color: #ffffff;
+}
+
+.titleImg{
+  max-height: 240px;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.panel .list-group img{
+  max-height: 56px;
+  max-width: 70px;
+  margin: 0px;
+  margin-right: 0.5em;
+}
+
+.newArticle .list-group-item{
+  min-height: 75px;
+}
