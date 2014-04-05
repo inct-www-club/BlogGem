@@ -112,6 +112,10 @@ class BlogGem < Sinatra::Base
 
 
   helpers do
+    def to(path)
+      "#{request.scheme}://#{request.host}#{request.script_name}#{path}".sub('/main.cgi', '')
+    end
+
     def do_template(template, options = {}, locals = {}, &block)
       public_send(@theme["template"], template, options, locals, &block)
     end
@@ -372,7 +376,7 @@ class BlogGem < Sinatra::Base
   end
 
   post "/console/upload" do
-    File.open('public/uploads/' + params[:file][:filename], "w") do |f|
+    File.open('uploads/' + params[:file][:filename], "w") do |f|
       f.write(params[:file][:tempfile].read)
     end
     return "Complete upload to <strong>/uploads/" + params[:file][:filename] + "</strong>"
@@ -677,7 +681,5 @@ class User < ActiveRecord::Base
   end
 end
 
-builder = Rack::Builder.new do
-  run BlogGem.new
-end
-Rack::Handler::CGI.run(builder)
+set :run => false
+Rack::Handler::CGI.run(BlogGem)

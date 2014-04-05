@@ -66,9 +66,9 @@
       <div class="panel-heading"><h4>最新記事</h4></div>
       <div class="panel-body panel-news">
         <% @newerEntry.each do |entry| %>
-        <a href="<%= to("/blog/entry/#{entry.id}/}") %>">
+        <a href="<%= to("/blog/entry/#{entry.id}/") %>">
           <div class="thumbnail">
-            <div class="thuimg"><img src="<%= entry.thumbnail %>" alt="entry thumbnail"></div>
+            <div class="thuimg"><img src="<%= to(entry.thumbnail) %>" alt="entry thumbnail"></div>
             <div class="caption"><h4><%= entry.title %></h4></div>
           </div>
         </a>
