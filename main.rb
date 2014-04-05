@@ -257,7 +257,7 @@ class BlogGem < Sinatra::Base
     id = i.to_i
     redirect to '/' if id <= 0
 
-    #begin
+    begin
       @status = params[:status]
       @comment = Comment.where(:entry_id => id, :allow => 1)
       @commentNum = @comment.size
@@ -268,9 +268,9 @@ class BlogGem < Sinatra::Base
       @page_title = "#{@entry.title} - #{@settings["blog title"]}"
 
       do_template :blog_entry
-    #rescue
-      #raise Sinatra::NotFound
-    #end
+    rescue
+      raise Sinatra::NotFound
+    end
   end
 
   post '/blog/entry/:id/send-comment' do |i|
@@ -301,8 +301,10 @@ class BlogGem < Sinatra::Base
 
   get '/products/' do
     @activeProducts = 'active'
-    targer_category_id = Category.where(:name => '製作物').first.id
-    entries_id = Searcher.where(:category_id => targer_category_id)
+    begin
+      targer_category_id = Category.where(:name => '製作物').first.id
+      entries_id = Searcher.where(:category_id => targer_category_id)
+    end
     @products = Entry.where(:id => entries_id)
     do_template  :products
   end
@@ -392,7 +394,6 @@ class BlogGem < Sinatra::Base
     @settings["comment approval"] = !!params["comment approval".to_sym]
     @settings["since"] = params["since".to_sym].to_i
 
-    #bloggem.set_theme!(@settings['theme'])
     BlogGem.write_json_file(@settings, "settings.json")
     redirect to "/console/settings/?status=success"
   end
