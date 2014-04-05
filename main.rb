@@ -123,7 +123,11 @@ class BlogGem < Sinatra::Base
     end
 
     def link_to(href, name)
-      "<a href='#{href}'>#{name}</a>"
+      if href then
+        "<a href='#{href}'>#{name}</a>"
+      else
+        "<a>#{name}</a>"
+      end
     end
 
     def set_prev_and_next_link!(elements, pagination, standard_link)

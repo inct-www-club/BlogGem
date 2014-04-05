@@ -9,8 +9,8 @@
   <%= erb :entry_tpl %>
   <% end %>
   <ul class="pager">
-    <li class="previous <%= @previousClass %>"><a href="<%= @previousLink %>">&larr; 前のページ</a>
-    <li class="next <%= @nextClass %>"><a href="<%= @pnextLink %>">次のページ &rarr;</a>
+    <li class="previous <%= @previousClass %>"><%= link_to(@previousLink, '&larr; 前のページ') %></li>
+    <li class="next <%= @nextClass %>"><%= link_to(@pnextLink, '次のページ &rarr;') %></li>
   </ul>
 </div><!-- col-sm-9 -->
 
