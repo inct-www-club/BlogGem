@@ -154,7 +154,6 @@ class BlogGem < Sinatra::Base
       @pre_active = false
       @entry.each do |entry|
         @pre_active = @pre_active || entry.include_pre?
-        p entry.include_pre?
       end
 
       do_template :blogPages
