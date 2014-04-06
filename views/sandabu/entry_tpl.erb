@@ -5,7 +5,9 @@
   </div>
 
   <div class="panel-body">
+    <% if @e.thumbnail then %>
     <p><img src="<%= to(@e.thumbnail) %>" /></p>
+    <% end %>
     <p><%= @e.text %></p>
     <% if @e.read_more then %>
     <a href="<%= to("/blog/entry/#{@e.id}/") %>"><button class='btn btn-primary'>続きを読む</button></a>

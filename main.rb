@@ -456,8 +456,8 @@ class BlogGem < Sinatra::Base
   end
 
   post '/console/entry/:id/delete' do |id|
-    if id.to_i > 0 then
-      entry = Entry.find(key)
+    entry = Entry.find_by_id(id.to_i)
+    if entry then
       Comment.where(:entry_id => entry.id).each do |comment|
         comment.destroy
       end
