@@ -17,7 +17,7 @@
   <div class="panel-footer">
     カテゴリー:
     <% @e.categories.each do |category| %>
-    <a href"<%= to("/blog/category/#{category}/") %>">&nbsp;<%= category %>,</a>
+    &nbsp;<a href="<%= to("/blog/category/#{category}/") %>"><%= category %></a>,
     <% end %>
     <br />
     コメント<span class='badge'><%= @e.comment_num %></span>

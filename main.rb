@@ -168,7 +168,7 @@ class BlogGem < Sinatra::Base
 
       of = (pagination-1)*5
       wh = {:category_id => category_info[0].id}
-      searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
+      searcher = Searcher.order("entry_id desc").limit(6).offset(of).where(wh)
       raise Sinatra::NotFound  unless searcher.size > 0
 
       set_prev_and_next_link!(searcher, pagination, "/blog/category/#{category}/")
@@ -306,12 +306,15 @@ class BlogGem < Sinatra::Base
   get '/products/' do
     @activeProducts = 'active'
     begin
-      targer_category_id = Category.where(:name => '製作物').first.id
+      targer_category_id = Category.find_by_name('製作物').id
       entries_id = Searcher.where(:category_id => targer_category_id)
     rescue
-      entries_id = 0
+      entries_id = Array.new
     end
-    @products = Entry.where(:id => entries_id)
+    @products = Array.new
+    entries_id.each do |entry|
+      @products << Entry.find(entry.entry_id)
+    end
     do_template  :products
   end
 
@@ -447,6 +450,7 @@ class BlogGem < Sinatra::Base
     end
     entry.save
 
+    Searcher.where(:entry_id => entry.id).each { |searcher| searcher.destroy }
     if params[:category] then
       params[:category].each do |c|
         Searcher.create(:entry_id => entry.id, :category_id => c)
