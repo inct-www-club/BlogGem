@@ -5,7 +5,7 @@
   </div>
 
   <div class="panel-body">
-    <% if @e.thumbnail then %>
+    <% unless nil_or_blank?(@e.thumbnail) then %>
     <p><img src="<%= to(@e.thumbnail) %>" /></p>
     <% end %>
     <p><%= @e.text %></p>
