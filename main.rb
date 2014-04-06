@@ -417,7 +417,7 @@ class BlogGem < Sinatra::Base
       @title = entry.title
       @body = entry.body
       @thumbnail = entry.thumbnail
-      @entryCategory = entry.category.split(",")
+      @entryCategory = entry.category.split(", ")
     elsif id == 'new' then
       @entryCategory = Array.new
     else

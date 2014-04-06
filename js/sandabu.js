@@ -13,7 +13,7 @@ $(document).ready(function(){
     $('img').error(function(){
           $(this).attr({
               src: '/image/noimage.png',
-              alt: 'image not founf'
+              alt: 'image not found'
           });
     });
 });
