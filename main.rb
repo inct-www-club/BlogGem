@@ -7,6 +7,7 @@ require 'bcrypt'
 require 'sqlite3'
 
 class BlogGem < Sinatra::Base
+
   def initialize(app = nil)
     super(app)
     @settings = BlogGem.load_json("settings.json")
@@ -573,6 +574,10 @@ class BlogGem < Sinatra::Base
       User.find(params[:id]).destroy
     end
     redirect to "/console/members/?status=leave"
+  end
+
+  not_found do
+    '<h1>Not Found</h1>'
   end
 end
 
