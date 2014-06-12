@@ -1,8 +1,13 @@
 DirectoryIndex index.cgi/
 RewriteEngine On
-RewriteCond %{HTTP_HOST} ^(www\.)?sandabu\.sakura\.ne\.jp$ [NC,OR]
-RewriteCond %{HTTP_HOST} ^www\.sandabu\.net$ [NC]
-RewriteRule .* http://sandabu.net%{REQUEST_URI} [R=301,L]
+
+RewriteCond %{REQUEST_URI} (console|sign_up|sign_in)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://sandabu.sakura.ne.jp%{REQUEST_URI} [QSA,L]
+
+RewriteCond %{REQUEST_URI} !(console|sign_up|sign_in)
+RewriteCond %{HTTP_HOST} (^www|sakura\.ne\.jp$) [NC]
+RewriteRule ^(.*)$ http://sandabu.net%{REQUEST_URI} [R=301,L]
 
 RewriteBase /
 RewriteCond %{REQUEST_URI} !(css|js|font|uploads|image|console_styles|index.cgi)
