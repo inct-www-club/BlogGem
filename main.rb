@@ -1,5 +1,3 @@
-#BlogGem sandabu edition
-
 require 'rubygems'
 require 'sinatra'
 require 'active_record'
@@ -9,6 +7,7 @@ require 'bcrypt'
 require 'sqlite3'
 
 class BlogGem < Sinatra::Base
+
   def initialize(app = nil)
     super(app)
     @settings = BlogGem.load_json("settings.json")
@@ -111,6 +110,10 @@ class BlogGem < Sinatra::Base
 
 
   helpers do
+    def to(path)
+      super(path).sub('/index.cgi', '')
+    end
+
     def do_template(template, options = {}, locals = {}, &block)
       public_send(@theme["template"], template, options, locals, &block)
     end
@@ -121,7 +124,11 @@ class BlogGem < Sinatra::Base
     end
 
     def link_to(href, name)
-      "<a href='#{href}'>#{name}</a>"
+      if href then
+        "<a href='#{href}'>#{name}</a>"
+      else
+        "<a>#{name}</a>"
+      end
     end
 
     def set_prev_and_next_link!(elements, pagination, standard_link)
@@ -149,7 +156,6 @@ class BlogGem < Sinatra::Base
       @pre_active = false
       @entry.each do |entry|
         @pre_active = @pre_active || entry.include_pre?
-        p entry.include_pre?
       end
 
       do_template :blogPages
@@ -163,7 +169,7 @@ class BlogGem < Sinatra::Base
 
       of = (pagination-1)*5
       wh = {:category_id => category_info[0].id}
-      searcher = Searcher.order("id desc").limit(6).offset(of).where(wh)
+      searcher = Searcher.order("entry_id desc").limit(6).offset(of).where(wh)
       raise Sinatra::NotFound  unless searcher.size > 0
 
       set_prev_and_next_link!(searcher, pagination, "/blog/category/#{category}/")
@@ -256,7 +262,7 @@ class BlogGem < Sinatra::Base
     id = i.to_i
     redirect to '/' if id <= 0
 
-    #begin
+    begin
       @status = params[:status]
       @comment = Comment.where(:entry_id => id, :allow => 1)
       @commentNum = @comment.size
@@ -267,9 +273,9 @@ class BlogGem < Sinatra::Base
       @page_title = "#{@entry.title} - #{@settings["blog title"]}"
 
       do_template :blog_entry
-    #rescue
-      #raise Sinatra::NotFound
-    #end
+    rescue
+      raise Sinatra::NotFound
+    end
   end
 
   post '/blog/entry/:id/send-comment' do |i|
@@ -300,9 +306,16 @@ class BlogGem < Sinatra::Base
 
   get '/products/' do
     @activeProducts = 'active'
-    targer_category_id = Category.where(:name => '製作物').first.id
-    entries_id = Searcher.where(:category_id => targer_category_id)
-    @products = Entry.where(:id => entries_id)
+    begin
+      targer_category_id = Category.find_by_name('製作物').id
+      entries_id = Searcher.where(:category_id => targer_category_id)
+    rescue
+      entries_id = Array.new
+    end
+    @products = Array.new
+    entries_id.each do |entry|
+      @products << Entry.find(entry.entry_id)
+    end
     do_template  :products
   end
 
@@ -371,7 +384,7 @@ class BlogGem < Sinatra::Base
   end
 
   post "/console/upload" do
-    File.open('public/uploads/' + params[:file][:filename], "w") do |f|
+    File.open('uploads/' + params[:file][:filename], "w") do |f|
       f.write(params[:file][:tempfile].read)
     end
     return "Complete upload to <strong>/uploads/" + params[:file][:filename] + "</strong>"
@@ -391,7 +404,6 @@ class BlogGem < Sinatra::Base
     @settings["comment approval"] = !!params["comment approval".to_sym]
     @settings["since"] = params["since".to_sym].to_i
 
-    #bloggem.set_theme!(@settings['theme'])
     BlogGem.write_json_file(@settings, "settings.json")
     redirect to "/console/settings/?status=success"
   end
@@ -409,7 +421,7 @@ class BlogGem < Sinatra::Base
       @title = entry.title
       @body = entry.body
       @thumbnail = entry.thumbnail
-      @entryCategory = entry.category.split(",")
+      @entryCategory = entry.category.split(", ")
     elsif id == 'new' then
       @entryCategory = Array.new
     else
@@ -439,6 +451,7 @@ class BlogGem < Sinatra::Base
     end
     entry.save
 
+    Searcher.where(:entry_id => entry.id).each { |searcher| searcher.destroy }
     if params[:category] then
       params[:category].each do |c|
         Searcher.create(:entry_id => entry.id, :category_id => c)
@@ -448,8 +461,8 @@ class BlogGem < Sinatra::Base
   end
 
   post '/console/entry/:id/delete' do |id|
-    if id.to_i > 0 then
-      entry = Entry.find(key)
+    entry = Entry.find_by_id(id.to_i)
+    if entry then
       Comment.where(:entry_id => entry.id).each do |comment|
         comment.destroy
       end
@@ -561,6 +574,10 @@ class BlogGem < Sinatra::Base
       User.find(params[:id]).destroy
     end
     redirect to "/console/members/?status=leave"
+  end
+
+  not_found do
+    '<h1>Not Found</h1>'
   end
 end
 

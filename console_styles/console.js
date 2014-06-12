@@ -103,16 +103,13 @@ $(function(){
 
   $("#update").bind("click", function(){
 
-    // FormData オブジェクトを作成
     var fd = new FormData();
 
-    // テキストデータおよびアップロードファイルが設定されていれば追加
     fd.append( "status", $("#status").val() );
     if ( $("#file").val() !== '' ) {
       fd.append( "file", $("#file").prop("files")[0] );
     }
 
-    // dataにFormDataを指定する場合 processData,contentTypeをfalseにしてjQueryがdataを処理しないようにする
     var postData = {
       type : "POST",
       dataType : "text",
@@ -123,7 +120,6 @@ $(function(){
 
     var success = document.getElementById('success');
 
-    // ajax送信
     $.ajax(
       "/console/upload", postData
     ).done(function(text){
