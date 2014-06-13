@@ -15,7 +15,7 @@
   </div>
 
   <div class="panel-footer">
-    <div><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://sandabu.net" data-text="aaaa" data-lang="ja">ツイート</a></div>
+    <div><a href="https://twitter.com/share" class="twitter-share-button" data-url="<%= to("/blog/entry/#{@e.id}/") %>" data-text="さんだぶ - <%= @e.title %>" data-lang="ja">ツイート</a></div>
     カテゴリー:
     <% @e.categories.each do |category| %>
     &nbsp;<a href="<%= to("/blog/category/#{category}/") %>"><%= category %></a>,
