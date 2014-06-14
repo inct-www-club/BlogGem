@@ -3,7 +3,7 @@
   <div class="list-group newArticle">
     <% @newerEntry.each do |entry| %>
     <a class="list-group-item" href="<%= to("/blog/entry/#{entry.id}/") %>">
-      <img class="pull-left" src="<%= to(entry.thumbnail) %>" alt="thumbnail" />
+      <img class="pull-left" src="<%= to(entry.thumbnail != '' ? entry.thumbnail : '/image/noimage.png') %>" alt="thumbnail" />
       <p><%= entry.title %></p>
     </a>
     <% end %>
