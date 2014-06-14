@@ -1,4 +1,4 @@
-DirectoryIndex index.cgi/
+DirectoryIndex index.cgi/ .ht
 RewriteEngine On
 
 RewriteCond %{REQUEST_URI} (console|sign_up|sign_in)
