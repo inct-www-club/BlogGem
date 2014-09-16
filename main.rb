@@ -724,6 +724,9 @@ class Entry < ActiveRecord::Base
   end
 end
 
+class Draft < ActiveRecord::Base
+end
+
 class Comment < ActiveRecord::Base
   def date()
     fdate = DateTime.parse("#{created_at}")
