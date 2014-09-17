@@ -27,7 +27,7 @@
             - checked = ''
           %input{:type => 'checkbox', :name => 'category[]', :value => c.id, :checked => checked}= c.name
   .form-group{:style => 'margin-top:30px;'}
-    - create_form_buttons().each do |property|
+    - create_form_buttons(@save_button).each do |property|
       %button{property}= property[:name]
 %div{:style => "margin-top:40px"}
   .alert.alert-success{:id => 'success', :style => 'display:none;'}

@@ -195,7 +195,7 @@ class BlogGem < Sinatra::Base
       system("echo \"#{body}\" | mail -s \"#{title}\" #{to}")
     end
 
-    def create_form_buttons()
+    def create_form_buttons(save_button=false)
       buttons = Array.new
       buttons << {:type  => 'submit',
                   :value => 'post',
@@ -203,12 +203,14 @@ class BlogGem < Sinatra::Base
                   :target => '',
                   :onClick => "post_preview(this.form, './post', '')",
                   :name => 'Post'}
-      buttons << {:type  => 'submit',
-                  :value => 'save',
-                  :class => 'btn btn-default',
-                  :target => '',
-                  :onClick => "grand_parent(this).action = './post'",
-                  :name => 'Save'}
+      if save_button
+        buttons << {:type  => 'submit',
+                    :value => 'save',
+                    :class => 'btn btn-default',
+                    :target => '',
+                    :onClick => "post_preview(this.form, './save', '')",
+                    :name => 'Save'}
+      end
       buttons << {:type  => 'submit',
                   :value => 'preview',
                   :class => 'btn btn-default',
@@ -411,6 +413,7 @@ class BlogGem < Sinatra::Base
   #entry
   get '/console/entry/' do
     @entry = Entry.order("id desc").where(nil)
+    @draft = Draft.order("id desc").where(nil)
     console_haml :element_list
   end
 
@@ -424,9 +427,28 @@ class BlogGem < Sinatra::Base
       @entryCategory = entry.category.split(", ")
     elsif id == 'new' then
       @entryCategory = Array.new
+      @save_button = true
     else
       redirect to '/console/'
     end
+    @category = Category.where(nil)
+    console_haml :edit
+  end
+
+  get '/console/draft/:id/' do |id|
+    key = id.to_i
+    if key > 0 then
+      entry = Draft.find(key)
+      @title = entry.title
+      @body = entry.body
+      @thumbnail = entry.thumbnail
+      @entryCategory = entry.category.split(", ")
+    elsif id == 'new' then
+      @entryCategory = Array.new
+    else
+      redirect to '/console/'
+    end
+    @save_button = true
     @category = Category.where(nil)
     console_haml :edit
   end
@@ -457,6 +479,72 @@ class BlogGem < Sinatra::Base
         Searcher.create(:entry_id => entry.id, :category_id => c)
       end
     end
+    redirect to '/console/entry/'
+  end
+
+  post '/console/entry/new/save' do
+    entry = Draft.new
+
+    entry.body  = params[:entry]
+    entry.thumbnail = params[:thumbnail]
+    entry.title = params[:title]
+    begin
+      entry.category = params[:category].join(", ")
+    rescue
+      entry.category = ''
+    end
+    entry.save
+
+    redirect to '/console/entry/'
+  end
+
+  post '/console/draft/:id/post' do |id|
+    entry = Entry.new
+    entry.body  = params[:entry]
+    entry.thumbnail = params[:thumbnail]
+    entry.title = params[:title]
+    begin
+      entry.category = params[:category].join(", ")
+    rescue
+      entry.category = ''
+    end
+    entry.save
+
+    Searcher.where(:entry_id => entry.id).each { |searcher| searcher.destroy }
+    if params[:category] then
+      params[:category].each do |c|
+        Searcher.create(:entry_id => entry.id, :category_id => c)
+      end
+    end
+
+    key = id.to_i
+    if key > 0 then
+      Draft.find(key).destroy
+    end
+
+    redirect to '/console/entry/'
+  end
+
+  post '/console/draft/:id/save' do |id|
+    key = id.to_i
+    if key > 0 then
+      entry = Draft.find(key)
+    elsif id == 'new' then
+      entry = Draft.new
+    else
+      redirect to '/console/entry/'
+    end
+
+    entry.body  = params[:entry]
+    entry.thumbnail = params[:thumbnail]
+    entry.title = params[:title]
+    begin
+      entry.category = params[:category].join(", ")
+    rescue
+      entry.category = ''
+    end
+    entry.save
+
     redirect to '/console/entry/'
   end
 
@@ -650,6 +738,9 @@ class Entry < ActiveRecord::Base
     $1 =~ /src=["'](.*?)["']/
     return $1
   end
+end
+
+class Draft < ActiveRecord::Base
 end
 
 class Comment < ActiveRecord::Base
