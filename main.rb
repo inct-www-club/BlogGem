@@ -208,7 +208,7 @@ class BlogGem < Sinatra::Base
                     :value => 'save',
                     :class => 'btn btn-default',
                     :target => '',
-                    :onClick => "post_preview(this.form, './post', '')",
+                    :onClick => "post_preview(this.form, './save', '')",
                     :name => 'Save'}
       end
       buttons << {:type  => 'submit',
@@ -479,6 +479,22 @@ class BlogGem < Sinatra::Base
         Searcher.create(:entry_id => entry.id, :category_id => c)
       end
     end
+    redirect to '/console/entry/'
+  end
+
+  post '/console/entry/new/save' do |id|
+    entry = Draft.new
+
+    entry.body  = params[:entry]
+    entry.thumbnail = params[:thumbnail]
+    entry.title = params[:title]
+    begin
+      entry.category = params[:category].join(", ")
+    rescue
+      entry.category = ''
+    end
+    entry.save
+
     redirect to '/console/entry/'
   end
 
