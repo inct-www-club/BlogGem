@@ -1,3 +1,5 @@
 rvm inst*.db
 uploads/
 design/WWW/.project
+*.db
+storage/
