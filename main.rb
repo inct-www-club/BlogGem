@@ -482,7 +482,7 @@ class BlogGem < Sinatra::Base
     redirect to '/console/entry/'
   end
 
-  post '/console/entry/new/save' do |id|
+  post '/console/entry/new/save' do
     entry = Draft.new
 
     entry.body  = params[:entry]
