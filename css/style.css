@@ -17,18 +17,27 @@ html {
 }
 
 #footer{
+  height: 100px;
+  position: absolute;
+  bottom: 0;
   background-color: #5290ed;
-  min-height: 40px;
   color: #FFFFFF;
-  text-align : center;
-  margin-top: 20px;
 }
 
-#wrap {
+#wrapper {
+  width: 100%;
+  position: relative;
+  height:auto !important; /*IE6対策*/
+  height: 100%; /*IE6対策*/
   min-height: 100%;
-  height: auto;
-  margin: 0 auto -60px;
-  padding: 0 0 60px;
+}
+
+#contents {
+  padding-bottom: 100px; /*フッターの高さと同じ*/
+}
+
+#footer p {
+  margin: 10px 0;
 }
 
 .tab {
