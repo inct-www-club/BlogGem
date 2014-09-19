@@ -733,6 +733,10 @@ class Entry < ActiveRecord::Base
     return @text
   end
 
+  def description()
+    body.gsub(/<(.|\s)*?>/, '')[0, 200]
+  end
+
   def img_src()
     body =~ /<img(.*?)>/
     $1 =~ /src=["'](.*?)["']/
