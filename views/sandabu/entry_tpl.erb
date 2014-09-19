@@ -1,11 +1,11 @@
 <div class="panel">
   <div class="panel-heading">
-    <% if @entry.kind_of?(Array) then %>
+    <% if @entry.kind_of?(Array) then #配列でない場合は単一記事ページなので、h1タグにする%>
     <a class="titleFont" href="<%= to("/blog/entry/#{@e.id}/") %>"><h2><%= @e.title %></h2></a>
     <% else %>
     <a class="titleFont" href="<%= to("/blog/entry/#{@e.id}/") %>"><h1><%= @e.title %></h1></a>
     <% end %>
-    <%= @e.date %>
+    <time><%= @e.date %></time>
   </div>
 
   <div class="panel-body">
