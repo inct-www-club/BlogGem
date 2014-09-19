@@ -14,7 +14,8 @@
 </head>
 
 <body>
-<div id="wrap">
+<div id="wrapper">
+<div id="contents">
 <div id="header">
   <img alt="header" src="<%= to('/image/header.png') %>"/>
 </div>
@@ -34,8 +35,11 @@
 </div>
 </div>
 <div id="footer">
+  <div class="container">
   <p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://sandabu.net" data-text="<% @blog_title %>" data-lang="ja">ツイート</a></p>
-  <p><%= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved." %></p>
+  <p><%= "&copy; #{@since} - #{@year} #{@copyright}" %></p>
+  </div>
+</div>
 </div>
 <script src="https://code.jquery.com/jquery.min.js" type="text/javascript"></script>
 <script src="<%= to('/js/bootstrap.min.js') %>" type="text/javascript"></script>

@@ -8,26 +8,27 @@
       %script{:src => 'https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'}
       %script{:src => 'https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js'}
   %body
-    #wrap
-      #header
-        %img{:src => to('/image/header.png'), :alt => 'header'}
-      .tab
+    #wrapper
+      #content
+        #header
+          %img{:src => to('/image/header.png'), :alt => 'header'}
+        .tab
+          .container
+            %ul.nav.nav-tabs
+              %li{:class => @activeHome}
+                %a{:href => to('/')}= 'ホーム'
+              %li{:class => @activeBlog}
+                %a{:href => to('/blog/')}= 'ブログ'
+              %li{:class => @activeProducts}
+                %a{:href => to('/products/')}= '作品'
+              %li{:class => @activeContact}<
+                %a{:href => to('/contact/')}= '連絡'
+              %li{:class => @activeLink}<
+                %a{:href => to('/link/')}= 'リンク'
         .container
-          %ul.nav.nav-tabs
-            %li{:class => @activeHome}
-              %a{:href => to('/')}= 'ホーム'
-            %li{:class => @activeBlog}
-              %a{:href => to('/blog/')}= 'ブログ'
-            %li{:class => @activeProducts}
-              %a{:href => to('/products/')}= '作品'
-            %li{:class => @activeContact}<
-              %a{:href => to('/contact/')}= '連絡'
-            %li{:class => @activeLink}<
-              %a{:href => to('/link/')}= 'リンク'
-      .container
-        = yield
-    #footer
-      %p<= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
+          = yield
+      #footer
+        %p<= "Copyright (C) #{@since} - #{@year} #{@copyright} All Rights Reserved."
     %script{:type => "text/javascript", :src => 'https://code.jquery.com/jquery.min.js'}
     %script{:type => "text/javascript", :src => to('/js/bootstrap.min.js')}
     %script{:type => "text/javascript", :src => to('/js/sandabu.js')}
