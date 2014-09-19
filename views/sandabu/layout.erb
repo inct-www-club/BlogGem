@@ -14,7 +14,7 @@
   <!-- twitter card -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content='<%= "#{@page_title || @blog_title}" %>'>
-  <% if @e.kind_of(Entry) then %>
+  <% unless @e.nil? then %>
   <meta name="twitter:description" content="<%= @e.description %>">
   <meta name="twitter:image" content="<%= to @e.thumbnail %>">
   <% else %>
